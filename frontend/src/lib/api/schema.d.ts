@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+  "/api/v1/calibration/fit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Fit
+     * @description Estimate speed and acceleration from timed movements (distances or turn angles).
+     */
+    post: operations["fit_api_v1_calibration_fit_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/examples": {
     parameters: {
       query?: never;
@@ -52,6 +72,66 @@ export interface paths {
     get: operations["health_api_v1_health_get"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/routes/grid": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Occupancy Grid
+     * @description The planning grid for the scenario's robot, as run-length-encoded blocked cells.
+     */
+    post: operations["occupancy_grid_api_v1_routes_grid_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/routes/matrix": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Travel Matrix
+     * @description Travel times between the start pose and every mission, modelled or measured.
+     */
+    post: operations["travel_matrix_api_v1_routes_matrix_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/routes/plan": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Plan Route
+     * @description Plan a route between two nodes ("start" or a mission id) and time it.
+     */
+    post: operations["plan_route_api_v1_routes_plan_post"];
     delete?: never;
     options?: never;
     head?: never;
@@ -108,7 +188,22 @@ export interface components {
      * AllOfBonus
      * @description ``points`` are awarded when every listed mission succeeds.
      */
-    AllOfBonus: {
+    "AllOfBonus-Input": {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "all_of_bonus";
+      /** Missions */
+      missions: string[];
+      /** Points */
+      points: number;
+    };
+    /**
+     * AllOfBonus
+     * @description ``points`` are awarded when every listed mission succeeds.
+     */
+    "AllOfBonus-Output": {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -120,7 +215,7 @@ export interface components {
       points: number;
     };
     /** Arena */
-    Arena: {
+    "Arena-Input": {
       /**
        * Grid Resolution
        * @description Grid cell size in metres
@@ -129,15 +224,80 @@ export interface components {
       /** Height */
       height: number;
       /** Home Zones */
-      home_zones: components["schemas"]["Zone"][];
+      home_zones?: components["schemas"]["Zone-Input"][];
       /** Obstacles */
-      obstacles: components["schemas"]["Obstacle"][];
-      start_pose: components["schemas"]["Pose"];
+      obstacles?: components["schemas"]["Obstacle-Input"][];
+      start_pose: components["schemas"]["Pose-Input"];
       /** Width */
       width: number;
     };
+    /** Arena */
+    "Arena-Output": {
+      /**
+       * Grid Resolution
+       * @description Grid cell size in metres
+       */
+      grid_resolution: number;
+      /** Height */
+      height: number;
+      /** Home Zones */
+      home_zones: components["schemas"]["Zone-Output"][];
+      /** Obstacles */
+      obstacles: components["schemas"]["Obstacle-Output"][];
+      start_pose: components["schemas"]["Pose-Output"];
+      /** Width */
+      width: number;
+    };
+    /** CalibrationRequest */
+    CalibrationRequest: {
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "linear" | "angular";
+      /** Measurements */
+      measurements: components["schemas"]["Measurement"][];
+    };
+    /** CalibrationResult */
+    CalibrationResult: {
+      /** Acceleration */
+      acceleration: number | null;
+      /** Max Speed */
+      max_speed: number;
+      /**
+       * Method
+       * @enum {string}
+       */
+      method:
+        "average_speed" | "proportional_fit" | "linear_least_squares" | "nonlinear_least_squares";
+      /**
+       * Model
+       * @enum {string}
+       */
+      model: "constant_speed" | "trapezoidal";
+      /** R Squared */
+      r_squared: number | null;
+      /** Residuals */
+      residuals: number[];
+      /** Warnings */
+      warnings: string[];
+    };
     /** CircleShape */
-    CircleShape: {
+    "CircleShape-Input": {
+      /** Cx */
+      cx: number;
+      /** Cy */
+      cy: number;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "circle";
+      /** Radius */
+      radius: number;
+    };
+    /** CircleShape */
+    "CircleShape-Output": {
       /** Cx */
       cx: number;
       /** Cy */
@@ -159,7 +319,38 @@ export interface components {
      *     team may change attachments; ``reset_time`` is the handling time spent in home per return.
      *     ``must_end_in_home``: the plan must finish with the robot in a home zone.
      */
-    CompetitionFormat: {
+    "CompetitionFormat-Input": {
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "single_run" | "multi_run";
+      /**
+       * Must End In Home
+       * @default false
+       */
+      must_end_in_home: boolean;
+      /**
+       * Reset Time
+       * @default 0
+       */
+      reset_time: number;
+      /**
+       * Time Budget
+       * @description Match length in seconds
+       */
+      time_budget: number;
+    };
+    /**
+     * CompetitionFormat
+     * @description How a match is structured.
+     *
+     *     ``single_run`` (WRO RoboMission style): one continuous attempt, no touching the robot.
+     *     ``multi_run`` (FLL Challenge style): the robot returns to a home zone between runs, where the
+     *     team may change attachments; ``reset_time`` is the handling time spent in home per return.
+     *     ``must_end_in_home``: the plan must finish with the robot in a home zone.
+     */
+    "CompetitionFormat-Output": {
       /**
        * Kind
        * @enum {string}
@@ -189,7 +380,26 @@ export interface components {
      *     ``(s + 1) / (n + 2)`` (Laplace's rule of succession). It never returns exactly 0 or 1, because
      *     a finite number of practice runs cannot establish certainty.
      */
-    CountsSuccess: {
+    "CountsSuccess-Input": {
+      /** Attempts */
+      attempts: number;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "counts";
+      /** Successes */
+      successes: number;
+    };
+    /**
+     * CountsSuccess
+     * @description Success measured in practice: ``successes`` out of ``attempts``.
+     *
+     *     The point estimate is the posterior mean under a uniform Beta(1, 1) prior,
+     *     ``(s + 1) / (n + 2)`` (Laplace's rule of succession). It never returns exactly 0 or 1, because
+     *     a finite number of practice runs cannot establish certainty.
+     */
+    "CountsSuccess-Output": {
       /** Attempts */
       attempts: number;
       /**
@@ -204,7 +414,20 @@ export interface components {
      * Empirical
      * @description Resample from measured values (e.g. stopwatch times from practice).
      */
-    Empirical: {
+    "Empirical-Input": {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "empirical";
+      /** Samples */
+      samples: number[];
+    };
+    /**
+     * Empirical
+     * @description Resample from measured values (e.g. stopwatch times from practice).
+     */
+    "Empirical-Output": {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -226,7 +449,22 @@ export interface components {
      * Excludes
      * @description At most one of the two missions may be chosen.
      */
-    Excludes: {
+    "Excludes-Input": {
+      /** A */
+      a: string;
+      /** B */
+      b: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "excludes";
+    };
+    /**
+     * Excludes
+     * @description At most one of the two missions may be chosen.
+     */
+    "Excludes-Output": {
       /** A */
       a: string;
       /** B */
@@ -241,7 +479,22 @@ export interface components {
      * FailurePenalty
      * @description ``points`` are subtracted when ``mission`` is attempted and ends failed.
      */
-    FailurePenalty: {
+    "FailurePenalty-Input": {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "failure_penalty";
+      /** Mission */
+      mission: string;
+      /** Points */
+      points: number;
+    };
+    /**
+     * FailurePenalty
+     * @description ``points`` are subtracted when ``mission`` is attempted and ends failed.
+     */
+    "FailurePenalty-Output": {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -253,7 +506,7 @@ export interface components {
       points: number;
     };
     /** Fixed */
-    Fixed: {
+    "Fixed-Input": {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -261,6 +514,34 @@ export interface components {
       kind: "fixed";
       /** Value */
       value: number;
+    };
+    /** Fixed */
+    "Fixed-Output": {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "fixed";
+      /** Value */
+      value: number;
+    };
+    /** GridResponse */
+    GridResponse: {
+      /**
+       * Blocked Runs
+       * @description Blocked cells as (row, first column, run length)
+       */
+      blocked_runs: [number, number, number][];
+      /** Columns */
+      columns: number;
+      /** Free Count */
+      free_count: number;
+      /** Inflation */
+      inflation: number;
+      /** Resolution */
+      resolution: number;
+      /** Rows */
+      rows: number;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -272,6 +553,11 @@ export interface components {
       /** Status */
       status: string;
     };
+    /**
+     * Heuristic
+     * @enum {string}
+     */
+    Heuristic: "manhattan" | "octile" | "euclidean" | "zero";
     /** Issue */
     Issue: {
       /** Code */
@@ -287,6 +573,39 @@ export interface components {
        */
       severity: "error" | "warning";
     };
+    /** LegFailureOut */
+    LegFailureOut: {
+      /** From Node */
+      from_node: string;
+      /** Message */
+      message: string;
+      /** Status */
+      status: string;
+      /** To Node */
+      to_node: string;
+    };
+    /** LegOut */
+    LegOut: {
+      /** From Node */
+      from_node: string;
+      /** Length */
+      length: number | null;
+      /** Modeled Seconds */
+      modeled_seconds: number | null;
+      /** Points */
+      points: [number, number][];
+      /**
+       * Provenance
+       * @enum {string}
+       */
+      provenance: "modeled" | "measured";
+      /** Seconds */
+      seconds: number;
+      /** To Node */
+      to_node: string;
+      /** Turning Seconds */
+      turning_seconds: number | null;
+    };
     /**
      * LogNormal
      * @description Right-skewed, strictly positive. Parameterised by median and geometric std. deviation.
@@ -294,7 +613,7 @@ export interface components {
      *     If ``X = median · exp(σ Z)`` with ``Z ~ N(0, 1)`` and ``σ = ln(gsd)``, then
      *     ``E[X] = median · exp(σ² / 2)``.
      */
-    LogNormal: {
+    "LogNormal-Input": {
       /** Gsd */
       gsd: number;
       /**
@@ -306,6 +625,43 @@ export interface components {
       median: number;
     };
     /**
+     * LogNormal
+     * @description Right-skewed, strictly positive. Parameterised by median and geometric std. deviation.
+     *
+     *     If ``X = median · exp(σ Z)`` with ``Z ~ N(0, 1)`` and ``σ = ln(gsd)``, then
+     *     ``E[X] = median · exp(σ² / 2)``.
+     */
+    "LogNormal-Output": {
+      /** Gsd */
+      gsd: number;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "lognormal";
+      /** Median */
+      median: number;
+    };
+    /** MatrixResponse */
+    MatrixResponse: {
+      /** Failures */
+      failures: components["schemas"]["LegFailureOut"][];
+      /** Legs */
+      legs: components["schemas"]["LegOut"][];
+      /** Nodes */
+      nodes: string[];
+    };
+    /**
+     * Measurement
+     * @description One timed movement: ``amount`` metres (driving) or radians (turning) in ``seconds``.
+     */
+    Measurement: {
+      /** Amount */
+      amount: number;
+      /** Seconds */
+      seconds: number;
+    };
+    /**
      * Mission
      * @description A task on the field.
      *
@@ -314,8 +670,55 @@ export interface components {
      *     ``execution_time``. If ``max_attempts > 1`` and ``retry_time`` is omitted, each retry is
      *     assumed to take as long as the first attempt.
      */
-    Mission: {
-      approach_pose: components["schemas"]["Pose"];
+    "Mission-Input": {
+      approach_pose: components["schemas"]["Pose-Input"];
+      /** Attachment */
+      attachment?: string | null;
+      /**
+       * Description
+       * @default
+       */
+      description: string;
+      /** Execution Time */
+      execution_time:
+        | components["schemas"]["Fixed-Input"]
+        | components["schemas"]["Triangular-Input"]
+        | components["schemas"]["LogNormal-Input"]
+        | components["schemas"]["Empirical-Input"];
+      /** Id */
+      id: string;
+      /**
+       * Max Attempts
+       * @default 1
+       */
+      max_attempts: number;
+      /** Name */
+      name: string;
+      /** Retry Time */
+      retry_time?:
+        | (
+            | components["schemas"]["Fixed-Input"]
+            | components["schemas"]["Triangular-Input"]
+            | components["schemas"]["LogNormal-Input"]
+            | components["schemas"]["Empirical-Input"]
+          )
+        | null;
+      /** Success */
+      success:
+        | components["schemas"]["ProbabilitySuccess-Input"]
+        | components["schemas"]["CountsSuccess-Input"];
+    };
+    /**
+     * Mission
+     * @description A task on the field.
+     *
+     *     ``approach_pose`` is where the robot must be (and which way it must face) to start the
+     *     mission. It must be collision-free; the contact manoeuvre itself is part of
+     *     ``execution_time``. If ``max_attempts > 1`` and ``retry_time`` is omitted, each retry is
+     *     assumed to take as long as the first attempt.
+     */
+    "Mission-Output": {
+      approach_pose: components["schemas"]["Pose-Output"];
       /** Attachment */
       attachment: string | null;
       /**
@@ -325,10 +728,10 @@ export interface components {
       description: string;
       /** Execution Time */
       execution_time:
-        | components["schemas"]["Fixed"]
-        | components["schemas"]["Triangular"]
-        | components["schemas"]["LogNormal"]
-        | components["schemas"]["Empirical"];
+        | components["schemas"]["Fixed-Output"]
+        | components["schemas"]["Triangular-Output"]
+        | components["schemas"]["LogNormal-Output"]
+        | components["schemas"]["Empirical-Output"];
       /** Id */
       id: string;
       /**
@@ -341,20 +744,37 @@ export interface components {
       /** Retry Time */
       retry_time:
         | (
-            | components["schemas"]["Fixed"]
-            | components["schemas"]["Triangular"]
-            | components["schemas"]["LogNormal"]
-            | components["schemas"]["Empirical"]
+            | components["schemas"]["Fixed-Output"]
+            | components["schemas"]["Triangular-Output"]
+            | components["schemas"]["LogNormal-Output"]
+            | components["schemas"]["Empirical-Output"]
           )
         | null;
       /** Success */
-      success: components["schemas"]["ProbabilitySuccess"] | components["schemas"]["CountsSuccess"];
+      success:
+        | components["schemas"]["ProbabilitySuccess-Output"]
+        | components["schemas"]["CountsSuccess-Output"];
     };
     /**
      * MissionPoints
      * @description ``points`` are awarded when ``mission`` succeeds.
      */
-    MissionPoints: {
+    "MissionPoints-Input": {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "mission_points";
+      /** Mission */
+      mission: string;
+      /** Points */
+      points: number;
+    };
+    /**
+     * MissionPoints
+     * @description ``points`` are awarded when ``mission`` succeeds.
+     */
+    "MissionPoints-Output": {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -376,7 +796,30 @@ export interface components {
      *     ``provenance`` records where the numbers came from: ``calibrated`` (fitted from the user's
      *     measurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).
      */
-    MotionProfile: {
+    "MotionProfile-Input": {
+      /** Acceleration */
+      acceleration?: number | null;
+      /** Max Speed */
+      max_speed: number;
+      /**
+       * Provenance
+       * @default entered
+       * @enum {string}
+       */
+      provenance: "calibrated" | "entered" | "reference";
+    };
+    /**
+     * MotionProfile
+     * @description Speed limits for one degree of freedom.
+     *
+     *     For translation: ``max_speed`` in m/s and ``acceleration`` in m/s².
+     *     For rotation: ``max_speed`` in rad/s and ``acceleration`` in rad/s².
+     *     ``acceleration = None`` means a constant-speed model (instant start and stop).
+     *
+     *     ``provenance`` records where the numbers came from: ``calibrated`` (fitted from the user's
+     *     measurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).
+     */
+    "MotionProfile-Output": {
       /** Acceleration */
       acceleration: number | null;
       /** Max Speed */
@@ -396,7 +839,7 @@ export interface components {
      *     is required to avoid. Both are treated identically by the planner; the kind only affects how
      *     the UI draws them.
      */
-    Obstacle: {
+    "Obstacle-Input": {
       /** Id */
       id: string;
       /**
@@ -408,13 +851,51 @@ export interface components {
       /** Label */
       label: string;
       /** Shape */
-      shape: components["schemas"]["RectShape"] | components["schemas"]["CircleShape"];
+      shape: components["schemas"]["RectShape-Input"] | components["schemas"]["CircleShape-Input"];
+    };
+    /**
+     * Obstacle
+     * @description Something the robot's footprint must not overlap.
+     *
+     *     ``solid`` is a physical object (mission model, wall); ``no_go`` is an area the team chooses or
+     *     is required to avoid. Both are treated identically by the planner; the kind only affects how
+     *     the UI draws them.
+     */
+    "Obstacle-Output": {
+      /** Id */
+      id: string;
+      /**
+       * Kind
+       * @default solid
+       * @enum {string}
+       */
+      kind: "solid" | "no_go";
+      /** Label */
+      label: string;
+      /** Shape */
+      shape:
+        components["schemas"]["RectShape-Output"] | components["schemas"]["CircleShape-Output"];
     };
     /**
      * Pose
      * @description A position plus a heading (counter-clockwise from +x, normalised to (-π, π]).
      */
-    Pose: {
+    "Pose-Input": {
+      /**
+       * Theta
+       * @default 0
+       */
+      theta: number;
+      /** X */
+      x: number;
+      /** Y */
+      y: number;
+    };
+    /**
+     * Pose
+     * @description A position plus a heading (counter-clockwise from +x, normalised to (-π, π]).
+     */
+    "Pose-Output": {
       /**
        * Theta
        * @default 0
@@ -429,7 +910,22 @@ export interface components {
      * Precedes
      * @description If both missions are chosen, ``before`` must come first. Neither requires the other.
      */
-    Precedes: {
+    "Precedes-Input": {
+      /** After */
+      after: string;
+      /** Before */
+      before: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "precedes";
+    };
+    /**
+     * Precedes
+     * @description If both missions are chosen, ``before`` must come first. Neither requires the other.
+     */
+    "Precedes-Output": {
       /** After */
       after: string;
       /** Before */
@@ -444,7 +940,20 @@ export interface components {
      * ProbabilitySuccess
      * @description A per-attempt success probability entered directly.
      */
-    ProbabilitySuccess: {
+    "ProbabilitySuccess-Input": {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "probability";
+      /** P */
+      p: number;
+    };
+    /**
+     * ProbabilitySuccess
+     * @description A per-attempt success probability entered directly.
+     */
+    "ProbabilitySuccess-Output": {
       /**
        * @description discriminator enum property added by openapi-typescript
        * @enum {string}
@@ -457,7 +966,31 @@ export interface components {
      * RectShape
      * @description Rectangle given by its centre, size and rotation about the centre.
      */
-    RectShape: {
+    "RectShape-Input": {
+      /** Cx */
+      cx: number;
+      /** Cy */
+      cy: number;
+      /** Height */
+      height: number;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "rect";
+      /**
+       * Rotation
+       * @default 0
+       */
+      rotation: number;
+      /** Width */
+      width: number;
+    };
+    /**
+     * RectShape
+     * @description Rectangle given by its centre, size and rotation about the centre.
+     */
+    "RectShape-Output": {
       /** Cx */
       cx: number;
       /** Cy */
@@ -484,7 +1017,31 @@ export interface components {
      *     ``semantics = "succeeded"``: ``after`` only scores if ``before`` succeeded (the robot skips
      *     ``after`` when ``before`` failed). ``"attempted"``: ``before`` only has to be attempted.
      */
-    Requires: {
+    "Requires-Input": {
+      /** After */
+      after: string;
+      /** Before */
+      before: string;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "requires";
+      /**
+       * Semantics
+       * @default succeeded
+       * @enum {string}
+       */
+      semantics: "attempted" | "succeeded";
+    };
+    /**
+     * Requires
+     * @description ``after`` may only be done if ``before`` was done earlier.
+     *
+     *     ``semantics = "succeeded"``: ``after`` only scores if ``before`` succeeded (the robot skips
+     *     ``after`` when ``before`` failed). ``"attempted"``: ``before`` only has to be attempted.
+     */
+    "Requires-Output": {
       /** After */
       after: string;
       /** Before */
@@ -502,8 +1059,8 @@ export interface components {
       semantics: "attempted" | "succeeded";
     };
     /** Robot */
-    Robot: {
-      angular: components["schemas"]["MotionProfile"];
+    "Robot-Input": {
+      angular: components["schemas"]["MotionProfile-Input"];
       /**
        * Can Reverse
        * @description Whether the robot may drive backwards instead of turning around
@@ -518,7 +1075,7 @@ export interface components {
       drive: "differential";
       /** Length */
       length: number;
-      linear: components["schemas"]["MotionProfile"];
+      linear: components["schemas"]["MotionProfile-Input"];
       /** Name */
       name: string;
       /**
@@ -529,14 +1086,112 @@ export interface components {
       /** Width */
       width: number;
     };
+    /** Robot */
+    "Robot-Output": {
+      angular: components["schemas"]["MotionProfile-Output"];
+      /**
+       * Can Reverse
+       * @description Whether the robot may drive backwards instead of turning around
+       * @default true
+       */
+      can_reverse: boolean;
+      /**
+       * Drive
+       * @default differential
+       * @constant
+       */
+      drive: "differential";
+      /** Length */
+      length: number;
+      linear: components["schemas"]["MotionProfile-Output"];
+      /** Name */
+      name: string;
+      /**
+       * Safety Margin
+       * @default 0
+       */
+      safety_margin: number;
+      /** Width */
+      width: number;
+    };
+    /** RouteOptions */
+    RouteOptions: {
+      /**
+       * Algorithm
+       * @default astar
+       * @enum {string}
+       */
+      algorithm: "astar" | "dijkstra";
+      /**
+       * Connectivity
+       * @default 8
+       * @enum {integer}
+       */
+      connectivity: 4 | 8;
+      /** @default octile */
+      heuristic: components["schemas"]["Heuristic"];
+      /**
+       * Smooth
+       * @default true
+       */
+      smooth: boolean;
+    };
+    /** RouteRequest */
+    RouteRequest: {
+      /** From Node */
+      from_node: string;
+      /**
+       * Include Trace
+       * @default false
+       */
+      include_trace: boolean;
+      /**
+       * @default {
+       *       "algorithm": "astar",
+       *       "connectivity": 8,
+       *       "heuristic": "octile",
+       *       "smooth": true
+       *     }
+       */
+      options: components["schemas"]["RouteOptions"];
+      scenario: components["schemas"]["Scenario-Input"];
+      /** To Node */
+      to_node: string;
+      /**
+       * Trace Limit
+       * @default 20000
+       */
+      trace_limit: number;
+    };
+    /** RouteResponse */
+    RouteResponse: {
+      /** Length Raw */
+      length_raw: number | null;
+      /** Length Smoothed */
+      length_smoothed: number | null;
+      /** Message */
+      message: string;
+      /** Raw Points */
+      raw_points: [number, number][];
+      search: components["schemas"]["SearchStatsOut"] | null;
+      /** Smoothed Points */
+      smoothed_points: [number, number][];
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "ok" | "pose_in_collision" | "snap_failed" | "unreachable";
+      timing: components["schemas"]["TimingOut"] | null;
+      trace: components["schemas"]["TraceOut"] | null;
+    };
     /** Scenario */
-    Scenario: {
-      arena: components["schemas"]["Arena"];
+    "Scenario-Input": {
+      arena: components["schemas"]["Arena-Input"];
       /** Constraints */
-      constraints: (
-        | components["schemas"]["Requires"]
-        | components["schemas"]["Precedes"]
-        | components["schemas"]["Excludes"]
+      constraints?: (
+        | components["schemas"]["Requires-Input"]
+        | components["schemas"]["Precedes-Input"]
+        | components["schemas"]["Excludes-Input"]
       )[];
       /**
        * Description
@@ -548,36 +1203,156 @@ export interface components {
        * @description True when the data is invented for demonstration, not an official ruleset
        */
       fictional: boolean;
-      format: components["schemas"]["CompetitionFormat"];
+      format: components["schemas"]["CompetitionFormat-Input"];
       /** Id */
       id: string;
       /** Missions */
-      missions: components["schemas"]["Mission"][];
+      missions?: components["schemas"]["Mission-Input"][];
       /** Name */
       name: string;
-      robot: components["schemas"]["Robot"];
+      robot: components["schemas"]["Robot-Input"];
       /**
        * Schema Version
        * @default 1
        * @constant
        */
       schema_version: 1;
-      scoring: components["schemas"]["ScoringProfile"];
+      scoring: components["schemas"]["ScoringProfile-Input"];
+      /** Travel Overrides */
+      travel_overrides?: components["schemas"]["TravelOverride"][];
+    };
+    /** Scenario */
+    "Scenario-Output": {
+      arena: components["schemas"]["Arena-Output"];
+      /** Constraints */
+      constraints: (
+        | components["schemas"]["Requires-Output"]
+        | components["schemas"]["Precedes-Output"]
+        | components["schemas"]["Excludes-Output"]
+      )[];
+      /**
+       * Description
+       * @default
+       */
+      description: string;
+      /**
+       * Fictional
+       * @description True when the data is invented for demonstration, not an official ruleset
+       */
+      fictional: boolean;
+      format: components["schemas"]["CompetitionFormat-Output"];
+      /** Id */
+      id: string;
+      /** Missions */
+      missions: components["schemas"]["Mission-Output"][];
+      /** Name */
+      name: string;
+      robot: components["schemas"]["Robot-Output"];
+      /**
+       * Schema Version
+       * @default 1
+       * @constant
+       */
+      schema_version: 1;
+      scoring: components["schemas"]["ScoringProfile-Output"];
       /** Travel Overrides */
       travel_overrides: components["schemas"]["TravelOverride"][];
     };
+    /** ScenarioRequest */
+    ScenarioRequest: {
+      scenario: components["schemas"]["Scenario-Input"];
+    };
     /** ScoringProfile */
-    ScoringProfile: {
+    "ScoringProfile-Input": {
+      /** Id */
+      id: string;
+      /** Name */
+      name: string;
+      /** Rules */
+      rules?: (
+        | components["schemas"]["MissionPoints-Input"]
+        | components["schemas"]["AllOfBonus-Input"]
+        | components["schemas"]["FailurePenalty-Input"]
+      )[];
+    };
+    /** ScoringProfile */
+    "ScoringProfile-Output": {
       /** Id */
       id: string;
       /** Name */
       name: string;
       /** Rules */
       rules: (
-        | components["schemas"]["MissionPoints"]
-        | components["schemas"]["AllOfBonus"]
-        | components["schemas"]["FailurePenalty"]
+        | components["schemas"]["MissionPoints-Output"]
+        | components["schemas"]["AllOfBonus-Output"]
+        | components["schemas"]["FailurePenalty-Output"]
       )[];
+    };
+    /** SearchStatsOut */
+    SearchStatsOut: {
+      /** Algorithm */
+      algorithm: string;
+      /**
+       * Cost
+       * @description Grid path cost in metres; null if no path
+       */
+      cost: number | null;
+      /** Expanded */
+      expanded: number;
+      /** Optimality Guaranteed */
+      optimality_guaranteed: boolean;
+    };
+    /** TimingLegOut */
+    TimingLegOut: {
+      /** Amount */
+      amount: number;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "turn" | "drive";
+      /** Reverse */
+      reverse: boolean;
+      /** Seconds */
+      seconds: number;
+    };
+    /** TimingOut */
+    TimingOut: {
+      /** Distance */
+      distance: number;
+      /** Legs */
+      legs: components["schemas"]["TimingLegOut"][];
+      /** Rotation */
+      rotation: number;
+      /** Total */
+      total: number;
+      /** Translation */
+      translation: number;
+    };
+    /** TraceEventOut */
+    TraceEventOut: {
+      /** Cell */
+      cell: [number, number];
+      /** F */
+      f: number;
+      /** G */
+      g: number;
+      /** H */
+      h: number;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "expand" | "push";
+      /** Parent */
+      parent: [number, number] | null;
+    };
+    /** TraceOut */
+    TraceOut: {
+      /** Events */
+      events: components["schemas"]["TraceEventOut"][];
+      /** Truncated */
+      truncated: boolean;
     };
     /**
      * TravelOverride
@@ -595,7 +1370,24 @@ export interface components {
      * Triangular
      * @description Best case / most likely / worst case — the easiest estimate for a team to give.
      */
-    Triangular: {
+    "Triangular-Input": {
+      /** High */
+      high: number;
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: "triangular";
+      /** Low */
+      low: number;
+      /** Mode */
+      mode: number;
+    };
+    /**
+     * Triangular
+     * @description Best case / most likely / worst case — the easiest estimate for a team to give.
+     */
+    "Triangular-Output": {
       /** High */
       high: number;
       /**
@@ -641,12 +1433,23 @@ export interface components {
      * Zone
      * @description A home / launch area. In multi-run formats the robot returns here between runs.
      */
-    Zone: {
+    "Zone-Input": {
       /** Id */
       id: string;
       /** Label */
       label: string;
-      shape: components["schemas"]["RectShape"];
+      shape: components["schemas"]["RectShape-Input"];
+    };
+    /**
+     * Zone
+     * @description A home / launch area. In multi-run formats the robot returns here between runs.
+     */
+    "Zone-Output": {
+      /** Id */
+      id: string;
+      /** Label */
+      label: string;
+      shape: components["schemas"]["RectShape-Output"];
     };
   };
   responses: never;
@@ -657,6 +1460,39 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  fit_api_v1_calibration_fit_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CalibrationRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CalibrationResult"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   list_examples_api_v1_examples_get: {
     parameters: {
       query?: never;
@@ -694,7 +1530,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Scenario"];
+          "application/json": components["schemas"]["Scenario-Output"];
         };
       };
       /** @description Validation Error */
@@ -724,6 +1560,105 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Health"];
+        };
+      };
+    };
+  };
+  occupancy_grid_api_v1_routes_grid_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScenarioRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GridResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  travel_matrix_api_v1_routes_matrix_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ScenarioRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatrixResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  plan_route_api_v1_routes_plan_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RouteRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RouteResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

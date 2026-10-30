@@ -1,7 +1,41 @@
 {
   "components": {
     "schemas": {
-      "AllOfBonus": {
+      "AllOfBonus-Input": {
+        "additionalProperties": false,
+        "description": "``points`` are awarded when every listed mission succeeds.",
+        "properties": {
+          "kind": {
+            "const": "all_of_bonus",
+            "default": "all_of_bonus",
+            "title": "Kind",
+            "type": "string"
+          },
+          "missions": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_-]{1,64}$",
+              "type": "string"
+            },
+            "maxItems": 32,
+            "minItems": 2,
+            "title": "Missions",
+            "type": "array"
+          },
+          "points": {
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Points",
+            "type": "number"
+          }
+        },
+        "required": [
+          "missions",
+          "points"
+        ],
+        "title": "AllOfBonus",
+        "type": "object"
+      },
+      "AllOfBonus-Output": {
         "additionalProperties": false,
         "description": "``points`` are awarded when every listed mission succeeds.",
         "properties": {
@@ -36,7 +70,7 @@
         "title": "AllOfBonus",
         "type": "object"
       },
-      "Arena": {
+      "Arena-Input": {
         "additionalProperties": false,
         "properties": {
           "grid_resolution": {
@@ -54,7 +88,7 @@
           },
           "home_zones": {
             "items": {
-              "$ref": "#/components/schemas/Zone"
+              "$ref": "#/components/schemas/Zone-Input"
             },
             "maxItems": 4,
             "title": "Home Zones",
@@ -62,14 +96,65 @@
           },
           "obstacles": {
             "items": {
-              "$ref": "#/components/schemas/Obstacle"
+              "$ref": "#/components/schemas/Obstacle-Input"
             },
             "maxItems": 200,
             "title": "Obstacles",
             "type": "array"
           },
           "start_pose": {
-            "$ref": "#/components/schemas/Pose"
+            "$ref": "#/components/schemas/Pose-Input"
+          },
+          "width": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Width",
+            "type": "number"
+          }
+        },
+        "required": [
+          "width",
+          "height",
+          "grid_resolution",
+          "start_pose"
+        ],
+        "title": "Arena",
+        "type": "object"
+      },
+      "Arena-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "grid_resolution": {
+            "description": "Grid cell size in metres",
+            "maximum": 0.25,
+            "minimum": 0.002,
+            "title": "Grid Resolution",
+            "type": "number"
+          },
+          "height": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Height",
+            "type": "number"
+          },
+          "home_zones": {
+            "items": {
+              "$ref": "#/components/schemas/Zone-Output"
+            },
+            "maxItems": 4,
+            "title": "Home Zones",
+            "type": "array"
+          },
+          "obstacles": {
+            "items": {
+              "$ref": "#/components/schemas/Obstacle-Output"
+            },
+            "maxItems": 200,
+            "title": "Obstacles",
+            "type": "array"
+          },
+          "start_pose": {
+            "$ref": "#/components/schemas/Pose-Output"
           },
           "width": {
             "exclusiveMinimum": 0.0,
@@ -89,7 +174,145 @@
         "title": "Arena",
         "type": "object"
       },
-      "CircleShape": {
+      "CalibrationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "linear",
+              "angular"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "measurements": {
+            "items": {
+              "$ref": "#/components/schemas/Measurement"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Measurements",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "measurements"
+        ],
+        "title": "CalibrationRequest",
+        "type": "object"
+      },
+      "CalibrationResult": {
+        "additionalProperties": false,
+        "properties": {
+          "acceleration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceleration"
+          },
+          "max_speed": {
+            "title": "Max Speed",
+            "type": "number"
+          },
+          "method": {
+            "enum": [
+              "average_speed",
+              "proportional_fit",
+              "linear_least_squares",
+              "nonlinear_least_squares"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "model": {
+            "enum": [
+              "constant_speed",
+              "trapezoidal"
+            ],
+            "title": "Model",
+            "type": "string"
+          },
+          "r_squared": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "R Squared"
+          },
+          "residuals": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Residuals",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "max_speed",
+          "acceleration",
+          "model",
+          "method",
+          "r_squared",
+          "residuals",
+          "warnings"
+        ],
+        "title": "CalibrationResult",
+        "type": "object"
+      },
+      "CircleShape-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "cx": {
+            "maximum": 40.0,
+            "minimum": -20.0,
+            "title": "Cx",
+            "type": "number"
+          },
+          "cy": {
+            "maximum": 40.0,
+            "minimum": -20.0,
+            "title": "Cy",
+            "type": "number"
+          },
+          "kind": {
+            "const": "circle",
+            "default": "circle",
+            "title": "Kind",
+            "type": "string"
+          },
+          "radius": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Radius",
+            "type": "number"
+          }
+        },
+        "required": [
+          "cx",
+          "cy",
+          "radius"
+        ],
+        "title": "CircleShape",
+        "type": "object"
+      },
+      "CircleShape-Output": {
         "additionalProperties": false,
         "properties": {
           "cx": {
@@ -126,7 +349,46 @@
         "title": "CircleShape",
         "type": "object"
       },
-      "CompetitionFormat": {
+      "CompetitionFormat-Input": {
+        "additionalProperties": false,
+        "description": "How a match is structured.\n\n``single_run`` (WRO RoboMission style): one continuous attempt, no touching the robot.\n``multi_run`` (FLL Challenge style): the robot returns to a home zone between runs, where the\nteam may change attachments; ``reset_time`` is the handling time spent in home per return.\n``must_end_in_home``: the plan must finish with the robot in a home zone.",
+        "properties": {
+          "kind": {
+            "enum": [
+              "single_run",
+              "multi_run"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "must_end_in_home": {
+            "default": false,
+            "title": "Must End In Home",
+            "type": "boolean"
+          },
+          "reset_time": {
+            "default": 0.0,
+            "maximum": 120.0,
+            "minimum": 0.0,
+            "title": "Reset Time",
+            "type": "number"
+          },
+          "time_budget": {
+            "description": "Match length in seconds",
+            "exclusiveMinimum": 0.0,
+            "maximum": 600.0,
+            "title": "Time Budget",
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "time_budget"
+        ],
+        "title": "CompetitionFormat",
+        "type": "object"
+      },
+      "CompetitionFormat-Output": {
         "additionalProperties": false,
         "description": "How a match is structured.\n\n``single_run`` (WRO RoboMission style): one continuous attempt, no touching the robot.\n``multi_run`` (FLL Challenge style): the robot returns to a home zone between runs, where the\nteam may change attachments; ``reset_time`` is the handling time spent in home per return.\n``must_end_in_home``: the plan must finish with the robot in a home zone.",
         "properties": {
@@ -167,7 +429,37 @@
         "title": "CompetitionFormat",
         "type": "object"
       },
-      "CountsSuccess": {
+      "CountsSuccess-Input": {
+        "additionalProperties": false,
+        "description": "Success measured in practice: ``successes`` out of ``attempts``.\n\nThe point estimate is the posterior mean under a uniform Beta(1, 1) prior,\n``(s + 1) / (n + 2)`` (Laplace's rule of succession). It never returns exactly 0 or 1, because\na finite number of practice runs cannot establish certainty.",
+        "properties": {
+          "attempts": {
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "kind": {
+            "const": "counts",
+            "default": "counts",
+            "title": "Kind",
+            "type": "string"
+          },
+          "successes": {
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Successes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "successes",
+          "attempts"
+        ],
+        "title": "CountsSuccess",
+        "type": "object"
+      },
+      "CountsSuccess-Output": {
         "additionalProperties": false,
         "description": "Success measured in practice: ``successes`` out of ``attempts``.\n\nThe point estimate is the posterior mean under a uniform Beta(1, 1) prior,\n``(s + 1) / (n + 2)`` (Laplace's rule of succession). It never returns exactly 0 or 1, because\na finite number of practice runs cannot establish certainty.",
         "properties": {
@@ -198,7 +490,35 @@
         "title": "CountsSuccess",
         "type": "object"
       },
-      "Empirical": {
+      "Empirical-Input": {
+        "additionalProperties": false,
+        "description": "Resample from measured values (e.g. stopwatch times from practice).",
+        "properties": {
+          "kind": {
+            "const": "empirical",
+            "default": "empirical",
+            "title": "Kind",
+            "type": "string"
+          },
+          "samples": {
+            "items": {
+              "maximum": 600.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "title": "Samples",
+            "type": "array"
+          }
+        },
+        "required": [
+          "samples"
+        ],
+        "title": "Empirical",
+        "type": "object"
+      },
+      "Empirical-Output": {
         "additionalProperties": false,
         "description": "Resample from measured values (e.g. stopwatch times from practice).",
         "properties": {
@@ -250,7 +570,35 @@
         "title": "ExampleSummary",
         "type": "object"
       },
-      "Excludes": {
+      "Excludes-Input": {
+        "additionalProperties": false,
+        "description": "At most one of the two missions may be chosen.",
+        "properties": {
+          "a": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "A",
+            "type": "string"
+          },
+          "b": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "B",
+            "type": "string"
+          },
+          "kind": {
+            "const": "excludes",
+            "default": "excludes",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "a",
+          "b"
+        ],
+        "title": "Excludes",
+        "type": "object"
+      },
+      "Excludes-Output": {
         "additionalProperties": false,
         "description": "At most one of the two missions may be chosen.",
         "properties": {
@@ -279,7 +627,36 @@
         "title": "Excludes",
         "type": "object"
       },
-      "FailurePenalty": {
+      "FailurePenalty-Input": {
+        "additionalProperties": false,
+        "description": "``points`` are subtracted when ``mission`` is attempted and ends failed.",
+        "properties": {
+          "kind": {
+            "const": "failure_penalty",
+            "default": "failure_penalty",
+            "title": "Kind",
+            "type": "string"
+          },
+          "mission": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Mission",
+            "type": "string"
+          },
+          "points": {
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Points",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mission",
+          "points"
+        ],
+        "title": "FailurePenalty",
+        "type": "object"
+      },
+      "FailurePenalty-Output": {
         "additionalProperties": false,
         "description": "``points`` are subtracted when ``mission`` is attempted and ends failed.",
         "properties": {
@@ -309,7 +686,29 @@
         "title": "FailurePenalty",
         "type": "object"
       },
-      "Fixed": {
+      "Fixed-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "fixed",
+            "default": "fixed",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "maximum": 600.0,
+            "minimum": 0.0,
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "Fixed",
+        "type": "object"
+      },
+      "Fixed-Output": {
         "additionalProperties": false,
         "properties": {
           "kind": {
@@ -330,6 +729,61 @@
           "value"
         ],
         "title": "Fixed",
+        "type": "object"
+      },
+      "GridResponse": {
+        "properties": {
+          "blocked_runs": {
+            "description": "Blocked cells as (row, first column, run length)",
+            "items": {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Blocked Runs",
+            "type": "array"
+          },
+          "columns": {
+            "title": "Columns",
+            "type": "integer"
+          },
+          "free_count": {
+            "title": "Free Count",
+            "type": "integer"
+          },
+          "inflation": {
+            "title": "Inflation",
+            "type": "number"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "number"
+          },
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "columns",
+          "rows",
+          "resolution",
+          "inflation",
+          "free_count",
+          "blocked_runs"
+        ],
+        "title": "GridResponse",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -357,6 +811,16 @@
         ],
         "title": "Health",
         "type": "object"
+      },
+      "Heuristic": {
+        "enum": [
+          "manhattan",
+          "octile",
+          "euclidean",
+          "zero"
+        ],
+        "title": "Heuristic",
+        "type": "string"
       },
       "Issue": {
         "additionalProperties": false,
@@ -402,7 +866,151 @@
         "title": "Issue",
         "type": "object"
       },
-      "LogNormal": {
+      "LegFailureOut": {
+        "properties": {
+          "from_node": {
+            "title": "From Node",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "to_node": {
+            "title": "To Node",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_node",
+          "to_node",
+          "status",
+          "message"
+        ],
+        "title": "LegFailureOut",
+        "type": "object"
+      },
+      "LegOut": {
+        "properties": {
+          "from_node": {
+            "title": "From Node",
+            "type": "string"
+          },
+          "length": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length"
+          },
+          "modeled_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modeled Seconds"
+          },
+          "points": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "provenance": {
+            "enum": [
+              "modeled",
+              "measured"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "number"
+          },
+          "to_node": {
+            "title": "To Node",
+            "type": "string"
+          },
+          "turning_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turning Seconds"
+          }
+        },
+        "required": [
+          "from_node",
+          "to_node",
+          "seconds",
+          "length",
+          "points",
+          "provenance",
+          "modeled_seconds",
+          "turning_seconds"
+        ],
+        "title": "LegOut",
+        "type": "object"
+      },
+      "LogNormal-Input": {
+        "additionalProperties": false,
+        "description": "Right-skewed, strictly positive. Parameterised by median and geometric std. deviation.\n\nIf ``X = median \u00b7 exp(\u03c3 Z)`` with ``Z ~ N(0, 1)`` and ``\u03c3 = ln(gsd)``, then\n``E[X] = median \u00b7 exp(\u03c3\u00b2 / 2)``.",
+        "properties": {
+          "gsd": {
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Gsd",
+            "type": "number"
+          },
+          "kind": {
+            "const": "lognormal",
+            "default": "lognormal",
+            "title": "Kind",
+            "type": "string"
+          },
+          "median": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 600.0,
+            "title": "Median",
+            "type": "number"
+          }
+        },
+        "required": [
+          "median",
+          "gsd"
+        ],
+        "title": "LogNormal",
+        "type": "object"
+      },
+      "LogNormal-Output": {
         "additionalProperties": false,
         "description": "Right-skewed, strictly positive. Parameterised by median and geometric std. deviation.\n\nIf ``X = median \u00b7 exp(\u03c3 Z)`` with ``Z ~ N(0, 1)`` and ``\u03c3 = ln(gsd)``, then\n``E[X] = median \u00b7 exp(\u03c3\u00b2 / 2)``.",
         "properties": {
@@ -433,12 +1041,68 @@
         "title": "LogNormal",
         "type": "object"
       },
-      "Mission": {
+      "MatrixResponse": {
+        "properties": {
+          "failures": {
+            "items": {
+              "$ref": "#/components/schemas/LegFailureOut"
+            },
+            "title": "Failures",
+            "type": "array"
+          },
+          "legs": {
+            "items": {
+              "$ref": "#/components/schemas/LegOut"
+            },
+            "title": "Legs",
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "nodes",
+          "legs",
+          "failures"
+        ],
+        "title": "MatrixResponse",
+        "type": "object"
+      },
+      "Measurement": {
+        "additionalProperties": false,
+        "description": "One timed movement: ``amount`` metres (driving) or radians (turning) in ``seconds``.",
+        "properties": {
+          "amount": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 50.0,
+            "title": "Amount",
+            "type": "number"
+          },
+          "seconds": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 120.0,
+            "title": "Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount",
+          "seconds"
+        ],
+        "title": "Measurement",
+        "type": "object"
+      },
+      "Mission-Input": {
         "additionalProperties": false,
         "description": "A task on the field.\n\n``approach_pose`` is where the robot must be (and which way it must face) to start the\nmission. It must be collision-free; the contact manoeuvre itself is part of\n``execution_time``. If ``max_attempts > 1`` and ``retry_time`` is omitted, each retry is\nassumed to take as long as the first attempt.",
         "properties": {
           "approach_pose": {
-            "$ref": "#/components/schemas/Pose"
+            "$ref": "#/components/schemas/Pose-Input"
           },
           "attachment": {
             "anyOf": [
@@ -462,25 +1126,25 @@
           "execution_time": {
             "discriminator": {
               "mapping": {
-                "empirical": "#/components/schemas/Empirical",
-                "fixed": "#/components/schemas/Fixed",
-                "lognormal": "#/components/schemas/LogNormal",
-                "triangular": "#/components/schemas/Triangular"
+                "empirical": "#/components/schemas/Empirical-Input",
+                "fixed": "#/components/schemas/Fixed-Input",
+                "lognormal": "#/components/schemas/LogNormal-Input",
+                "triangular": "#/components/schemas/Triangular-Input"
               },
               "propertyName": "kind"
             },
             "oneOf": [
               {
-                "$ref": "#/components/schemas/Fixed"
+                "$ref": "#/components/schemas/Fixed-Input"
               },
               {
-                "$ref": "#/components/schemas/Triangular"
+                "$ref": "#/components/schemas/Triangular-Input"
               },
               {
-                "$ref": "#/components/schemas/LogNormal"
+                "$ref": "#/components/schemas/LogNormal-Input"
               },
               {
-                "$ref": "#/components/schemas/Empirical"
+                "$ref": "#/components/schemas/Empirical-Input"
               }
             ],
             "title": "Execution Time"
@@ -508,25 +1172,25 @@
               {
                 "discriminator": {
                   "mapping": {
-                    "empirical": "#/components/schemas/Empirical",
-                    "fixed": "#/components/schemas/Fixed",
-                    "lognormal": "#/components/schemas/LogNormal",
-                    "triangular": "#/components/schemas/Triangular"
+                    "empirical": "#/components/schemas/Empirical-Input",
+                    "fixed": "#/components/schemas/Fixed-Input",
+                    "lognormal": "#/components/schemas/LogNormal-Input",
+                    "triangular": "#/components/schemas/Triangular-Input"
                   },
                   "propertyName": "kind"
                 },
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Fixed"
+                    "$ref": "#/components/schemas/Fixed-Input"
                   },
                   {
-                    "$ref": "#/components/schemas/Triangular"
+                    "$ref": "#/components/schemas/Triangular-Input"
                   },
                   {
-                    "$ref": "#/components/schemas/LogNormal"
+                    "$ref": "#/components/schemas/LogNormal-Input"
                   },
                   {
-                    "$ref": "#/components/schemas/Empirical"
+                    "$ref": "#/components/schemas/Empirical-Input"
                   }
                 ]
               },
@@ -539,17 +1203,149 @@
           "success": {
             "discriminator": {
               "mapping": {
-                "counts": "#/components/schemas/CountsSuccess",
-                "probability": "#/components/schemas/ProbabilitySuccess"
+                "counts": "#/components/schemas/CountsSuccess-Input",
+                "probability": "#/components/schemas/ProbabilitySuccess-Input"
               },
               "propertyName": "kind"
             },
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ProbabilitySuccess"
+                "$ref": "#/components/schemas/ProbabilitySuccess-Input"
               },
               {
-                "$ref": "#/components/schemas/CountsSuccess"
+                "$ref": "#/components/schemas/CountsSuccess-Input"
+              }
+            ],
+            "title": "Success"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "approach_pose",
+          "execution_time",
+          "success"
+        ],
+        "title": "Mission",
+        "type": "object"
+      },
+      "Mission-Output": {
+        "additionalProperties": false,
+        "description": "A task on the field.\n\n``approach_pose`` is where the robot must be (and which way it must face) to start the\nmission. It must be collision-free; the contact manoeuvre itself is part of\n``execution_time``. If ``max_attempts > 1`` and ``retry_time`` is omitted, each retry is\nassumed to take as long as the first attempt.",
+        "properties": {
+          "approach_pose": {
+            "$ref": "#/components/schemas/Pose-Output"
+          },
+          "attachment": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attachment"
+          },
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "execution_time": {
+            "discriminator": {
+              "mapping": {
+                "empirical": "#/components/schemas/Empirical-Output",
+                "fixed": "#/components/schemas/Fixed-Output",
+                "lognormal": "#/components/schemas/LogNormal-Output",
+                "triangular": "#/components/schemas/Triangular-Output"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Fixed-Output"
+              },
+              {
+                "$ref": "#/components/schemas/Triangular-Output"
+              },
+              {
+                "$ref": "#/components/schemas/LogNormal-Output"
+              },
+              {
+                "$ref": "#/components/schemas/Empirical-Output"
+              }
+            ],
+            "title": "Execution Time"
+          },
+          "id": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "max_attempts": {
+            "default": 1,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "retry_time": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "empirical": "#/components/schemas/Empirical-Output",
+                    "fixed": "#/components/schemas/Fixed-Output",
+                    "lognormal": "#/components/schemas/LogNormal-Output",
+                    "triangular": "#/components/schemas/Triangular-Output"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Fixed-Output"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Triangular-Output"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogNormal-Output"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Empirical-Output"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry Time"
+          },
+          "success": {
+            "discriminator": {
+              "mapping": {
+                "counts": "#/components/schemas/CountsSuccess-Output",
+                "probability": "#/components/schemas/ProbabilitySuccess-Output"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProbabilitySuccess-Output"
+              },
+              {
+                "$ref": "#/components/schemas/CountsSuccess-Output"
               }
             ],
             "title": "Success"
@@ -569,7 +1365,36 @@
         "title": "Mission",
         "type": "object"
       },
-      "MissionPoints": {
+      "MissionPoints-Input": {
+        "additionalProperties": false,
+        "description": "``points`` are awarded when ``mission`` succeeds.",
+        "properties": {
+          "kind": {
+            "const": "mission_points",
+            "default": "mission_points",
+            "title": "Kind",
+            "type": "string"
+          },
+          "mission": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Mission",
+            "type": "string"
+          },
+          "points": {
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Points",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mission",
+          "points"
+        ],
+        "title": "MissionPoints",
+        "type": "object"
+      },
+      "MissionPoints-Output": {
         "additionalProperties": false,
         "description": "``points`` are awarded when ``mission`` succeeds.",
         "properties": {
@@ -599,7 +1424,47 @@
         "title": "MissionPoints",
         "type": "object"
       },
-      "MotionProfile": {
+      "MotionProfile-Input": {
+        "additionalProperties": false,
+        "description": "Speed limits for one degree of freedom.\n\nFor translation: ``max_speed`` in m/s and ``acceleration`` in m/s\u00b2.\nFor rotation: ``max_speed`` in rad/s and ``acceleration`` in rad/s\u00b2.\n``acceleration = None`` means a constant-speed model (instant start and stop).\n\n``provenance`` records where the numbers came from: ``calibrated`` (fitted from the user's\nmeasurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).",
+        "properties": {
+          "acceleration": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 500.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceleration"
+          },
+          "max_speed": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 50.0,
+            "title": "Max Speed",
+            "type": "number"
+          },
+          "provenance": {
+            "default": "entered",
+            "enum": [
+              "calibrated",
+              "entered",
+              "reference"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          }
+        },
+        "required": [
+          "max_speed"
+        ],
+        "title": "MotionProfile",
+        "type": "object"
+      },
+      "MotionProfile-Output": {
         "additionalProperties": false,
         "description": "Speed limits for one degree of freedom.\n\nFor translation: ``max_speed`` in m/s and ``acceleration`` in m/s\u00b2.\nFor rotation: ``max_speed`` in rad/s and ``acceleration`` in rad/s\u00b2.\n``acceleration = None`` means a constant-speed model (instant start and stop).\n\n``provenance`` records where the numbers came from: ``calibrated`` (fitted from the user's\nmeasurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).",
         "properties": {
@@ -641,7 +1506,7 @@
         "title": "MotionProfile",
         "type": "object"
       },
-      "Obstacle": {
+      "Obstacle-Input": {
         "additionalProperties": false,
         "description": "Something the robot's footprint must not overlap.\n\n``solid`` is a physical object (mission model, wall); ``no_go`` is an area the team chooses or\nis required to avoid. Both are treated identically by the planner; the kind only affects how\nthe UI draws them.",
         "properties": {
@@ -668,17 +1533,68 @@
           "shape": {
             "discriminator": {
               "mapping": {
-                "circle": "#/components/schemas/CircleShape",
-                "rect": "#/components/schemas/RectShape"
+                "circle": "#/components/schemas/CircleShape-Input",
+                "rect": "#/components/schemas/RectShape-Input"
               },
               "propertyName": "kind"
             },
             "oneOf": [
               {
-                "$ref": "#/components/schemas/RectShape"
+                "$ref": "#/components/schemas/RectShape-Input"
               },
               {
-                "$ref": "#/components/schemas/CircleShape"
+                "$ref": "#/components/schemas/CircleShape-Input"
+              }
+            ],
+            "title": "Shape"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "shape"
+        ],
+        "title": "Obstacle",
+        "type": "object"
+      },
+      "Obstacle-Output": {
+        "additionalProperties": false,
+        "description": "Something the robot's footprint must not overlap.\n\n``solid`` is a physical object (mission model, wall); ``no_go`` is an area the team chooses or\nis required to avoid. Both are treated identically by the planner; the kind only affects how\nthe UI draws them.",
+        "properties": {
+          "id": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "default": "solid",
+            "enum": [
+              "solid",
+              "no_go"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "shape": {
+            "discriminator": {
+              "mapping": {
+                "circle": "#/components/schemas/CircleShape-Output",
+                "rect": "#/components/schemas/RectShape-Output"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RectShape-Output"
+              },
+              {
+                "$ref": "#/components/schemas/CircleShape-Output"
               }
             ],
             "title": "Shape"
@@ -693,7 +1609,38 @@
         "title": "Obstacle",
         "type": "object"
       },
-      "Pose": {
+      "Pose-Input": {
+        "additionalProperties": false,
+        "description": "A position plus a heading (counter-clockwise from +x, normalised to (-\u03c0, \u03c0]).",
+        "properties": {
+          "theta": {
+            "default": 0.0,
+            "maximum": 10000.0,
+            "minimum": -10000.0,
+            "title": "Theta",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 40.0,
+            "minimum": -20.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 40.0,
+            "minimum": -20.0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "title": "Pose",
+        "type": "object"
+      },
+      "Pose-Output": {
         "additionalProperties": false,
         "description": "A position plus a heading (counter-clockwise from +x, normalised to (-\u03c0, \u03c0]).",
         "properties": {
@@ -725,7 +1672,35 @@
         "title": "Pose",
         "type": "object"
       },
-      "Precedes": {
+      "Precedes-Input": {
+        "additionalProperties": false,
+        "description": "If both missions are chosen, ``before`` must come first. Neither requires the other.",
+        "properties": {
+          "after": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "After",
+            "type": "string"
+          },
+          "before": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Before",
+            "type": "string"
+          },
+          "kind": {
+            "const": "precedes",
+            "default": "precedes",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "Precedes",
+        "type": "object"
+      },
+      "Precedes-Output": {
         "additionalProperties": false,
         "description": "If both missions are chosen, ``before`` must come first. Neither requires the other.",
         "properties": {
@@ -754,7 +1729,30 @@
         "title": "Precedes",
         "type": "object"
       },
-      "ProbabilitySuccess": {
+      "ProbabilitySuccess-Input": {
+        "additionalProperties": false,
+        "description": "A per-attempt success probability entered directly.",
+        "properties": {
+          "kind": {
+            "const": "probability",
+            "default": "probability",
+            "title": "Kind",
+            "type": "string"
+          },
+          "p": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "P",
+            "type": "number"
+          }
+        },
+        "required": [
+          "p"
+        ],
+        "title": "ProbabilitySuccess",
+        "type": "object"
+      },
+      "ProbabilitySuccess-Output": {
         "additionalProperties": false,
         "description": "A per-attempt success probability entered directly.",
         "properties": {
@@ -778,7 +1776,58 @@
         "title": "ProbabilitySuccess",
         "type": "object"
       },
-      "RectShape": {
+      "RectShape-Input": {
+        "additionalProperties": false,
+        "description": "Rectangle given by its centre, size and rotation about the centre.",
+        "properties": {
+          "cx": {
+            "maximum": 40.0,
+            "minimum": -20.0,
+            "title": "Cx",
+            "type": "number"
+          },
+          "cy": {
+            "maximum": 40.0,
+            "minimum": -20.0,
+            "title": "Cy",
+            "type": "number"
+          },
+          "height": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Height",
+            "type": "number"
+          },
+          "kind": {
+            "const": "rect",
+            "default": "rect",
+            "title": "Kind",
+            "type": "string"
+          },
+          "rotation": {
+            "default": 0.0,
+            "maximum": 10000.0,
+            "minimum": -10000.0,
+            "title": "Rotation",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Width",
+            "type": "number"
+          }
+        },
+        "required": [
+          "cx",
+          "cy",
+          "width",
+          "height"
+        ],
+        "title": "RectShape",
+        "type": "object"
+      },
+      "RectShape-Output": {
         "additionalProperties": false,
         "description": "Rectangle given by its centre, size and rotation about the centre.",
         "properties": {
@@ -831,7 +1880,44 @@
         "title": "RectShape",
         "type": "object"
       },
-      "Requires": {
+      "Requires-Input": {
+        "additionalProperties": false,
+        "description": "``after`` may only be done if ``before`` was done earlier.\n\n``semantics = \"succeeded\"``: ``after`` only scores if ``before`` succeeded (the robot skips\n``after`` when ``before`` failed). ``\"attempted\"``: ``before`` only has to be attempted.",
+        "properties": {
+          "after": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "After",
+            "type": "string"
+          },
+          "before": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Before",
+            "type": "string"
+          },
+          "kind": {
+            "const": "requires",
+            "default": "requires",
+            "title": "Kind",
+            "type": "string"
+          },
+          "semantics": {
+            "default": "succeeded",
+            "enum": [
+              "attempted",
+              "succeeded"
+            ],
+            "title": "Semantics",
+            "type": "string"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "Requires",
+        "type": "object"
+      },
+      "Requires-Output": {
         "additionalProperties": false,
         "description": "``after`` may only be done if ``before`` was done earlier.\n\n``semantics = \"succeeded\"``: ``after`` only scores if ``before`` succeeded (the robot skips\n``after`` when ``before`` failed). ``\"attempted\"``: ``before`` only has to be attempted.",
         "properties": {
@@ -870,11 +1956,11 @@
         "title": "Requires",
         "type": "object"
       },
-      "Robot": {
+      "Robot-Input": {
         "additionalProperties": false,
         "properties": {
           "angular": {
-            "$ref": "#/components/schemas/MotionProfile"
+            "$ref": "#/components/schemas/MotionProfile-Input"
           },
           "can_reverse": {
             "default": true,
@@ -895,7 +1981,64 @@
             "type": "number"
           },
           "linear": {
-            "$ref": "#/components/schemas/MotionProfile"
+            "$ref": "#/components/schemas/MotionProfile-Input"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "safety_margin": {
+            "default": 0.0,
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Safety Margin",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Width",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "length",
+          "width",
+          "linear",
+          "angular"
+        ],
+        "title": "Robot",
+        "type": "object"
+      },
+      "Robot-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "angular": {
+            "$ref": "#/components/schemas/MotionProfile-Output"
+          },
+          "can_reverse": {
+            "default": true,
+            "description": "Whether the robot may drive backwards instead of turning around",
+            "title": "Can Reverse",
+            "type": "boolean"
+          },
+          "drive": {
+            "const": "differential",
+            "default": "differential",
+            "title": "Drive",
+            "type": "string"
+          },
+          "length": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 20.0,
+            "title": "Length",
+            "type": "number"
+          },
+          "linear": {
+            "$ref": "#/components/schemas/MotionProfile-Output"
           },
           "name": {
             "maxLength": 120,
@@ -930,31 +2073,228 @@
         "title": "Robot",
         "type": "object"
       },
-      "Scenario": {
+      "RouteOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "algorithm": {
+            "default": "astar",
+            "enum": [
+              "astar",
+              "dijkstra"
+            ],
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "connectivity": {
+            "default": 8,
+            "enum": [
+              4,
+              8
+            ],
+            "title": "Connectivity",
+            "type": "integer"
+          },
+          "heuristic": {
+            "$ref": "#/components/schemas/Heuristic",
+            "default": "octile"
+          },
+          "smooth": {
+            "default": true,
+            "title": "Smooth",
+            "type": "boolean"
+          }
+        },
+        "title": "RouteOptions",
+        "type": "object"
+      },
+      "RouteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "from_node": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "From Node",
+            "type": "string"
+          },
+          "include_trace": {
+            "default": false,
+            "title": "Include Trace",
+            "type": "boolean"
+          },
+          "options": {
+            "$ref": "#/components/schemas/RouteOptions",
+            "default": {
+              "algorithm": "astar",
+              "connectivity": 8,
+              "heuristic": "octile",
+              "smooth": true
+            }
+          },
+          "scenario": {
+            "$ref": "#/components/schemas/Scenario-Input"
+          },
+          "to_node": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "To Node",
+            "type": "string"
+          },
+          "trace_limit": {
+            "default": 20000,
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Trace Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scenario",
+          "from_node",
+          "to_node"
+        ],
+        "title": "RouteRequest",
+        "type": "object"
+      },
+      "RouteResponse": {
+        "properties": {
+          "length_raw": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length Raw"
+          },
+          "length_smoothed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length Smoothed"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "raw_points": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Raw Points",
+            "type": "array"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchStatsOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "smoothed_points": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Smoothed Points",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "pose_in_collision",
+              "snap_failed",
+              "unreachable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "timing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trace": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TraceOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "raw_points",
+          "smoothed_points",
+          "length_raw",
+          "length_smoothed",
+          "search",
+          "timing",
+          "trace"
+        ],
+        "title": "RouteResponse",
+        "type": "object"
+      },
+      "Scenario-Input": {
         "additionalProperties": false,
         "properties": {
           "arena": {
-            "$ref": "#/components/schemas/Arena"
+            "$ref": "#/components/schemas/Arena-Input"
           },
           "constraints": {
             "items": {
               "discriminator": {
                 "mapping": {
-                  "excludes": "#/components/schemas/Excludes",
-                  "precedes": "#/components/schemas/Precedes",
-                  "requires": "#/components/schemas/Requires"
+                  "excludes": "#/components/schemas/Excludes-Input",
+                  "precedes": "#/components/schemas/Precedes-Input",
+                  "requires": "#/components/schemas/Requires-Input"
                 },
                 "propertyName": "kind"
               },
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/Requires"
+                  "$ref": "#/components/schemas/Requires-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/Precedes"
+                  "$ref": "#/components/schemas/Precedes-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/Excludes"
+                  "$ref": "#/components/schemas/Excludes-Input"
                 }
               ]
             },
@@ -974,7 +2314,7 @@
             "type": "boolean"
           },
           "format": {
-            "$ref": "#/components/schemas/CompetitionFormat"
+            "$ref": "#/components/schemas/CompetitionFormat-Input"
           },
           "id": {
             "pattern": "^[A-Za-z0-9_-]{1,64}$",
@@ -983,7 +2323,7 @@
           },
           "missions": {
             "items": {
-              "$ref": "#/components/schemas/Mission"
+              "$ref": "#/components/schemas/Mission-Input"
             },
             "maxItems": 32,
             "title": "Missions",
@@ -996,7 +2336,7 @@
             "type": "string"
           },
           "robot": {
-            "$ref": "#/components/schemas/Robot"
+            "$ref": "#/components/schemas/Robot-Input"
           },
           "schema_version": {
             "const": 1,
@@ -1005,7 +2345,105 @@
             "type": "integer"
           },
           "scoring": {
-            "$ref": "#/components/schemas/ScoringProfile"
+            "$ref": "#/components/schemas/ScoringProfile-Input"
+          },
+          "travel_overrides": {
+            "items": {
+              "$ref": "#/components/schemas/TravelOverride"
+            },
+            "maxItems": 1000,
+            "title": "Travel Overrides",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "fictional",
+          "arena",
+          "robot",
+          "scoring",
+          "format"
+        ],
+        "title": "Scenario",
+        "type": "object"
+      },
+      "Scenario-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "arena": {
+            "$ref": "#/components/schemas/Arena-Output"
+          },
+          "constraints": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "excludes": "#/components/schemas/Excludes-Output",
+                  "precedes": "#/components/schemas/Precedes-Output",
+                  "requires": "#/components/schemas/Requires-Output"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Requires-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Precedes-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/Excludes-Output"
+                }
+              ]
+            },
+            "maxItems": 200,
+            "title": "Constraints",
+            "type": "array"
+          },
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "fictional": {
+            "description": "True when the data is invented for demonstration, not an official ruleset",
+            "title": "Fictional",
+            "type": "boolean"
+          },
+          "format": {
+            "$ref": "#/components/schemas/CompetitionFormat-Output"
+          },
+          "id": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "missions": {
+            "items": {
+              "$ref": "#/components/schemas/Mission-Output"
+            },
+            "maxItems": 32,
+            "title": "Missions",
+            "type": "array"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "robot": {
+            "$ref": "#/components/schemas/Robot-Output"
+          },
+          "schema_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "scoring": {
+            "$ref": "#/components/schemas/ScoringProfile-Output"
           },
           "travel_overrides": {
             "items": {
@@ -1033,7 +2471,20 @@
         "title": "Scenario",
         "type": "object"
       },
-      "ScoringProfile": {
+      "ScenarioRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "scenario": {
+            "$ref": "#/components/schemas/Scenario-Input"
+          }
+        },
+        "required": [
+          "scenario"
+        ],
+        "title": "ScenarioRequest",
+        "type": "object"
+      },
+      "ScoringProfile-Input": {
         "additionalProperties": false,
         "properties": {
           "id": {
@@ -1051,21 +2502,69 @@
             "items": {
               "discriminator": {
                 "mapping": {
-                  "all_of_bonus": "#/components/schemas/AllOfBonus",
-                  "failure_penalty": "#/components/schemas/FailurePenalty",
-                  "mission_points": "#/components/schemas/MissionPoints"
+                  "all_of_bonus": "#/components/schemas/AllOfBonus-Input",
+                  "failure_penalty": "#/components/schemas/FailurePenalty-Input",
+                  "mission_points": "#/components/schemas/MissionPoints-Input"
                 },
                 "propertyName": "kind"
               },
               "oneOf": [
                 {
-                  "$ref": "#/components/schemas/MissionPoints"
+                  "$ref": "#/components/schemas/MissionPoints-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/AllOfBonus"
+                  "$ref": "#/components/schemas/AllOfBonus-Input"
                 },
                 {
-                  "$ref": "#/components/schemas/FailurePenalty"
+                  "$ref": "#/components/schemas/FailurePenalty-Input"
+                }
+              ]
+            },
+            "maxItems": 200,
+            "title": "Rules",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ScoringProfile",
+        "type": "object"
+      },
+      "ScoringProfile-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "all_of_bonus": "#/components/schemas/AllOfBonus-Output",
+                  "failure_penalty": "#/components/schemas/FailurePenalty-Output",
+                  "mission_points": "#/components/schemas/MissionPoints-Output"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/MissionPoints-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/AllOfBonus-Output"
+                },
+                {
+                  "$ref": "#/components/schemas/FailurePenalty-Output"
                 }
               ]
             },
@@ -1080,6 +2579,200 @@
           "rules"
         ],
         "title": "ScoringProfile",
+        "type": "object"
+      },
+      "SearchStatsOut": {
+        "properties": {
+          "algorithm": {
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Grid path cost in metres; null if no path",
+            "title": "Cost"
+          },
+          "expanded": {
+            "title": "Expanded",
+            "type": "integer"
+          },
+          "optimality_guaranteed": {
+            "title": "Optimality Guaranteed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "algorithm",
+          "expanded",
+          "cost",
+          "optimality_guaranteed"
+        ],
+        "title": "SearchStatsOut",
+        "type": "object"
+      },
+      "TimingLegOut": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "number"
+          },
+          "kind": {
+            "enum": [
+              "turn",
+              "drive"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "reverse": {
+            "title": "Reverse",
+            "type": "boolean"
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "amount",
+          "seconds",
+          "reverse"
+        ],
+        "title": "TimingLegOut",
+        "type": "object"
+      },
+      "TimingOut": {
+        "properties": {
+          "distance": {
+            "title": "Distance",
+            "type": "number"
+          },
+          "legs": {
+            "items": {
+              "$ref": "#/components/schemas/TimingLegOut"
+            },
+            "title": "Legs",
+            "type": "array"
+          },
+          "rotation": {
+            "title": "Rotation",
+            "type": "number"
+          },
+          "total": {
+            "title": "Total",
+            "type": "number"
+          },
+          "translation": {
+            "title": "Translation",
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "translation",
+          "rotation",
+          "distance",
+          "legs"
+        ],
+        "title": "TimingOut",
+        "type": "object"
+      },
+      "TraceEventOut": {
+        "properties": {
+          "cell": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Cell",
+            "type": "array"
+          },
+          "f": {
+            "title": "F",
+            "type": "number"
+          },
+          "g": {
+            "title": "G",
+            "type": "number"
+          },
+          "h": {
+            "title": "H",
+            "type": "number"
+          },
+          "kind": {
+            "enum": [
+              "expand",
+              "push"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent"
+          }
+        },
+        "required": [
+          "kind",
+          "cell",
+          "parent",
+          "g",
+          "h",
+          "f"
+        ],
+        "title": "TraceEventOut",
+        "type": "object"
+      },
+      "TraceOut": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/TraceEventOut"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "events",
+          "truncated"
+        ],
+        "title": "TraceOut",
         "type": "object"
       },
       "TravelOverride": {
@@ -1111,7 +2804,44 @@
         "title": "TravelOverride",
         "type": "object"
       },
-      "Triangular": {
+      "Triangular-Input": {
+        "additionalProperties": false,
+        "description": "Best case / most likely / worst case \u2014 the easiest estimate for a team to give.",
+        "properties": {
+          "high": {
+            "maximum": 600.0,
+            "minimum": 0.0,
+            "title": "High",
+            "type": "number"
+          },
+          "kind": {
+            "const": "triangular",
+            "default": "triangular",
+            "title": "Kind",
+            "type": "string"
+          },
+          "low": {
+            "maximum": 600.0,
+            "minimum": 0.0,
+            "title": "Low",
+            "type": "number"
+          },
+          "mode": {
+            "maximum": 600.0,
+            "minimum": 0.0,
+            "title": "Mode",
+            "type": "number"
+          }
+        },
+        "required": [
+          "low",
+          "mode",
+          "high"
+        ],
+        "title": "Triangular",
+        "type": "object"
+      },
+      "Triangular-Output": {
         "additionalProperties": false,
         "description": "Best case / most likely / worst case \u2014 the easiest estimate for a team to give.",
         "properties": {
@@ -1233,7 +2963,7 @@
         "title": "VersionInfo",
         "type": "object"
       },
-      "Zone": {
+      "Zone-Input": {
         "additionalProperties": false,
         "description": "A home / launch area. In multi-run formats the robot returns here between runs.",
         "properties": {
@@ -1249,7 +2979,34 @@
             "type": "string"
           },
           "shape": {
-            "$ref": "#/components/schemas/RectShape"
+            "$ref": "#/components/schemas/RectShape-Input"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "shape"
+        ],
+        "title": "Zone",
+        "type": "object"
+      },
+      "Zone-Output": {
+        "additionalProperties": false,
+        "description": "A home / launch area. In multi-run formats the robot returns here between runs.",
+        "properties": {
+          "id": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "shape": {
+            "$ref": "#/components/schemas/RectShape-Output"
           }
         },
         "required": [
@@ -1269,6 +3026,48 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/calibration/fit": {
+      "post": {
+        "description": "Estimate speed and acceleration from timed movements (distances or turn angles).",
+        "operationId": "fit_api_v1_calibration_fit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalibrationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalibrationResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Fit",
+        "tags": [
+          "calibration"
+        ]
+      }
+    },
     "/api/v1/examples": {
       "get": {
         "description": "Fictional demonstration scenarios shipped with RoboRoute.",
@@ -1314,7 +3113,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Scenario"
+                  "$ref": "#/components/schemas/Scenario-Output"
                 }
               }
             },
@@ -1355,6 +3154,132 @@
         "summary": "Health",
         "tags": [
           "meta"
+        ]
+      }
+    },
+    "/api/v1/routes/grid": {
+      "post": {
+        "description": "The planning grid for the scenario's robot, as run-length-encoded blocked cells.",
+        "operationId": "occupancy_grid_api_v1_routes_grid_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GridResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Occupancy Grid",
+        "tags": [
+          "routes"
+        ]
+      }
+    },
+    "/api/v1/routes/matrix": {
+      "post": {
+        "description": "Travel times between the start pose and every mission, modelled or measured.",
+        "operationId": "travel_matrix_api_v1_routes_matrix_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatrixResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Travel Matrix",
+        "tags": [
+          "routes"
+        ]
+      }
+    },
+    "/api/v1/routes/plan": {
+      "post": {
+        "description": "Plan a route between two nodes (\"start\" or a mission id) and time it.",
+        "operationId": "plan_route_api_v1_routes_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RouteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Plan Route",
+        "tags": [
+          "routes"
         ]
       }
     },

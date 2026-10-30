@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
 
-import type { Scenario, Schemas } from "@/lib/api/client";
+import type { Model, Scenario } from "@/lib/api/client";
 import { formatAngle, formatLength, formatPoint, formatSeconds } from "@/lib/format/units";
 
 import type { Selection } from "./ArenaLayers";
 
-type Distribution =
-  Schemas["Fixed"] | Schemas["Triangular"] | Schemas["LogNormal"] | Schemas["Empirical"];
-type Shape = Schemas["RectShape"] | Schemas["CircleShape"];
+type Distribution = Model<"Fixed"> | Model<"Triangular"> | Model<"LogNormal"> | Model<"Empirical">;
+type Shape = Model<"RectShape"> | Model<"CircleShape">;
 
 function describeDistribution(d: Distribution): string {
   switch (d.kind) {

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import roboroute
 from roboroute.api.errors import install_error_handlers
 from roboroute.api.limits import BodySizeLimitMiddleware
-from roboroute.api.routes import examples, meta, scenarios
+from roboroute.api.routes import calibration, examples, meta, routing, scenarios
 from roboroute.api.settings import Settings
 from roboroute.engine.scenarios import list_example_scenarios
 
@@ -34,7 +34,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=settings.max_body_bytes)
 
-    for module in (meta, examples, scenarios):
+    for module in (meta, examples, scenarios, routing, calibration):
         app.include_router(module.router, prefix=API_PREFIX)
     return app
 

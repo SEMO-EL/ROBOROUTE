@@ -1,8 +1,8 @@
-import type { Scenario, Schemas } from "@/lib/api/client";
+import type { Model, Scenario } from "@/lib/api/client";
 import { arenaToScreen, type Viewport } from "@/lib/geometry/viewport";
 import { footprintRadius } from "@/lib/robot/footprint";
 
-type Shape = Schemas["RectShape"] | Schemas["CircleShape"];
+type Shape = Model<"RectShape"> | Model<"CircleShape">;
 
 export type Selection =
   | { kind: "mission"; id: string }

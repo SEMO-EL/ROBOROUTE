@@ -3,7 +3,20 @@ import createClient from "openapi-fetch";
 import type { components, paths } from "./schema";
 
 export type Schemas = components["schemas"];
-export type Scenario = Schemas["Scenario"];
+type SchemaName = keyof Schemas;
+
+/**
+ * A model as the API *returns* it. Models used in both requests and responses have separate
+ * "-Input" (defaults optional) and "-Output" (defaults always present) schemas; responses use the
+ * latter. An Output value is always assignable to the matching Input type.
+ */
+export type Model<K extends string> = `${K}-Output` extends SchemaName
+  ? Schemas[`${K}-Output`]
+  : K extends SchemaName
+    ? Schemas[K]
+    : never;
+
+export type Scenario = Model<"Scenario">;
 
 /** An error from the RoboRoute API, or from failing to reach it at all (status 0). */
 export class ApiError extends Error {
