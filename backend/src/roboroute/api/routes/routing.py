@@ -48,10 +48,7 @@ def plan_route(request: RouteRequest) -> RouteResponse:
     return RouteResponse.of(route, timing, tracer)
 
 
-@router.post("/matrix")
-def travel_matrix(request: ScenarioRequest) -> MatrixResponse:
-    """Travel times between the start pose and every mission, modelled or measured."""
-    scenario = request.scenario
+def check_matrix_work(scenario: Scenario) -> None:
     work = _cells(scenario) * (len(scenario.missions) + 1)
     if work > MAX_MATRIX_WORK:
         raise ApiError(
@@ -60,6 +57,13 @@ def travel_matrix(request: ScenarioRequest) -> MatrixResponse:
             "This grid is too fine for this many missions; use a coarser grid resolution.",
             {"work": work, "limit": MAX_MATRIX_WORK},
         )
+
+
+@router.post("/matrix")
+def travel_matrix(request: ScenarioRequest) -> MatrixResponse:
+    """Travel times between the start pose and every mission, modelled or measured."""
+    scenario = request.scenario
+    check_matrix_work(scenario)
     matrix = build_travel_matrix(scenario)
     return MatrixResponse(
         nodes=matrix.nodes,

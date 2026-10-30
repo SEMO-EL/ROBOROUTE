@@ -78,6 +78,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/optimize": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Optimize
+     * @description Choose and order missions to maximise the expected score within the time budget.
+     */
+    post: operations["optimize_api_v1_optimize_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/routes/grid": {
     parameters: {
       query?: never;
@@ -445,6 +465,13 @@ export interface components {
       /** Name */
       name: string;
     };
+    /** ExcludedOut */
+    ExcludedOut: {
+      /** Mission */
+      mission: string;
+      /** Reason */
+      reason: string;
+    };
     /**
      * Excludes
      * @description At most one of the two missions may be chosen.
@@ -474,6 +501,25 @@ export interface components {
        * @enum {string}
        */
       kind: "excludes";
+    };
+    /** ExplanationOut */
+    ExplanationOut: {
+      /** Budget */
+      budget: number;
+      /** Completion Time */
+      completion_time: number;
+      /** Expected Score */
+      expected_score: number;
+      /** Mission Seconds */
+      mission_seconds: number;
+      /** Reset Seconds */
+      reset_seconds: number;
+      /** Slack */
+      slack: number;
+      /** Travel Seconds */
+      travel_seconds: number;
+      /** Verdicts */
+      verdicts: components["schemas"]["VerdictOut"][];
     };
     /**
      * FailurePenalty
@@ -875,6 +921,69 @@ export interface components {
       /** Shape */
       shape:
         components["schemas"]["RectShape-Output"] | components["schemas"]["CircleShape-Output"];
+    };
+    /** OptimizeRequest */
+    OptimizeRequest: {
+      scenario: components["schemas"]["Scenario-Input"];
+      /**
+       * @default {
+       *       "sensitivity_factors": [
+       *         0.8,
+       *         0.9,
+       *         1.1,
+       *         1.2
+       *       ],
+       *       "top_k": 5
+       *     }
+       */
+      settings: components["schemas"]["PlanningSettings"];
+    };
+    /** OptimizeResponse */
+    OptimizeResponse: {
+      /** Alternatives */
+      alternatives: components["schemas"]["PlanOut"][];
+      /** Assumptions */
+      assumptions: string[];
+      /** Candidates */
+      candidates: string[];
+      /** Compute Seconds */
+      compute_seconds: number;
+      /** Excluded */
+      excluded: components["schemas"]["ExcludedOut"][];
+      explanation: components["schemas"]["ExplanationOut"] | null;
+      greedy: components["schemas"]["PlanOut"];
+      optimal: components["schemas"]["PlanOut"] | null;
+      /** Sensitivity */
+      sensitivity: components["schemas"]["SensitivityOut"][];
+      /** Warnings */
+      warnings: components["schemas"]["Issue"][];
+    };
+    /** PlanOut */
+    PlanOut: {
+      /** Completion Time */
+      completion_time: number;
+      /** Expected Score */
+      expected_score: number;
+      /** Route */
+      route: [number, number][][];
+      /** Runs */
+      runs: string[][];
+      /** Steps */
+      steps: components["schemas"]["StepOut"][];
+    };
+    /** PlanningSettings */
+    PlanningSettings: {
+      /**
+       * Sensitivity Factors
+       * @description Robot speed multipliers for the sensitivity analysis
+       */
+      sensitivity_factors?: number[];
+      /**
+       * Top K
+       * @description How many alternative plans to return
+       * @default 5
+       */
+      top_k: number;
     };
     /**
      * Pose
@@ -1302,6 +1411,38 @@ export interface components {
       /** Optimality Guaranteed */
       optimality_guaranteed: boolean;
     };
+    /** SensitivityOut */
+    SensitivityOut: {
+      /** Best Score */
+      best_score: number;
+      /** Completion Time */
+      completion_time: number;
+      /** Factor */
+      factor: number;
+      /** Runs */
+      runs: string[][];
+      /** Same Selection As Baseline */
+      same_selection_as_baseline: boolean;
+    };
+    /** StepOut */
+    StepOut: {
+      /** From Node */
+      from_node: string;
+      /**
+       * Kind
+       * @enum {string}
+       */
+      kind: "travel" | "mission" | "reset";
+      /**
+       * Provenance
+       * @enum {string}
+       */
+      provenance: "modeled" | "measured" | "planned";
+      /** Seconds */
+      seconds: number;
+      /** To Node */
+      to_node: string;
+    };
     /** TimingLegOut */
     TimingLegOut: {
       /** Amount */
@@ -1419,6 +1560,19 @@ export interface components {
       issues: components["schemas"]["Issue"][];
       /** Valid */
       valid: boolean;
+    };
+    /** VerdictOut */
+    VerdictOut: {
+      /** Counterfactual Score */
+      counterfactual_score: number | null;
+      /** Delta */
+      delta: number | null;
+      /** Mission */
+      mission: string;
+      /** Reason */
+      reason: string;
+      /** Selected */
+      selected: boolean;
     };
     /** VersionInfo */
     VersionInfo: {
@@ -1560,6 +1714,39 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Health"];
+        };
+      };
+    };
+  };
+  optimize_api_v1_optimize_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OptimizeRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OptimizeResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

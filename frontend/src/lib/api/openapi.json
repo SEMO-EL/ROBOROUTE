@@ -570,6 +570,24 @@
         "title": "ExampleSummary",
         "type": "object"
       },
+      "ExcludedOut": {
+        "properties": {
+          "mission": {
+            "title": "Mission",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mission",
+          "reason"
+        ],
+        "title": "ExcludedOut",
+        "type": "object"
+      },
       "Excludes-Input": {
         "additionalProperties": false,
         "description": "At most one of the two missions may be chosen.",
@@ -625,6 +643,57 @@
           "b"
         ],
         "title": "Excludes",
+        "type": "object"
+      },
+      "ExplanationOut": {
+        "properties": {
+          "budget": {
+            "title": "Budget",
+            "type": "number"
+          },
+          "completion_time": {
+            "title": "Completion Time",
+            "type": "number"
+          },
+          "expected_score": {
+            "title": "Expected Score",
+            "type": "number"
+          },
+          "mission_seconds": {
+            "title": "Mission Seconds",
+            "type": "number"
+          },
+          "reset_seconds": {
+            "title": "Reset Seconds",
+            "type": "number"
+          },
+          "slack": {
+            "title": "Slack",
+            "type": "number"
+          },
+          "travel_seconds": {
+            "title": "Travel Seconds",
+            "type": "number"
+          },
+          "verdicts": {
+            "items": {
+              "$ref": "#/components/schemas/VerdictOut"
+            },
+            "title": "Verdicts",
+            "type": "array"
+          }
+        },
+        "required": [
+          "budget",
+          "completion_time",
+          "slack",
+          "travel_seconds",
+          "mission_seconds",
+          "reset_seconds",
+          "expected_score",
+          "verdicts"
+        ],
+        "title": "ExplanationOut",
         "type": "object"
       },
       "FailurePenalty-Input": {
@@ -1607,6 +1676,200 @@
           "shape"
         ],
         "title": "Obstacle",
+        "type": "object"
+      },
+      "OptimizeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "scenario": {
+            "$ref": "#/components/schemas/Scenario-Input"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/PlanningSettings",
+            "default": {
+              "sensitivity_factors": [
+                0.8,
+                0.9,
+                1.1,
+                1.2
+              ],
+              "top_k": 5
+            }
+          }
+        },
+        "required": [
+          "scenario"
+        ],
+        "title": "OptimizeRequest",
+        "type": "object"
+      },
+      "OptimizeResponse": {
+        "properties": {
+          "alternatives": {
+            "items": {
+              "$ref": "#/components/schemas/PlanOut"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "candidates": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "compute_seconds": {
+            "title": "Compute Seconds",
+            "type": "number"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/components/schemas/ExcludedOut"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplanationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "greedy": {
+            "$ref": "#/components/schemas/PlanOut"
+          },
+          "optimal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sensitivity": {
+            "items": {
+              "$ref": "#/components/schemas/SensitivityOut"
+            },
+            "title": "Sensitivity",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "candidates",
+          "excluded",
+          "warnings",
+          "optimal",
+          "alternatives",
+          "greedy",
+          "explanation",
+          "sensitivity",
+          "assumptions",
+          "compute_seconds"
+        ],
+        "title": "OptimizeResponse",
+        "type": "object"
+      },
+      "PlanOut": {
+        "properties": {
+          "completion_time": {
+            "title": "Completion Time",
+            "type": "number"
+          },
+          "expected_score": {
+            "title": "Expected Score",
+            "type": "number"
+          },
+          "route": {
+            "items": {
+              "items": {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "title": "Route",
+            "type": "array"
+          },
+          "runs": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/StepOut"
+            },
+            "title": "Steps",
+            "type": "array"
+          }
+        },
+        "required": [
+          "runs",
+          "expected_score",
+          "completion_time",
+          "steps",
+          "route"
+        ],
+        "title": "PlanOut",
+        "type": "object"
+      },
+      "PlanningSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "sensitivity_factors": {
+            "description": "Robot speed multipliers for the sensitivity analysis",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 8,
+            "title": "Sensitivity Factors",
+            "type": "array"
+          },
+          "top_k": {
+            "default": 5,
+            "description": "How many alternative plans to return",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          }
+        },
+        "title": "PlanningSettings",
         "type": "object"
       },
       "Pose-Input": {
@@ -2617,6 +2880,88 @@
         "title": "SearchStatsOut",
         "type": "object"
       },
+      "SensitivityOut": {
+        "properties": {
+          "best_score": {
+            "title": "Best Score",
+            "type": "number"
+          },
+          "completion_time": {
+            "title": "Completion Time",
+            "type": "number"
+          },
+          "factor": {
+            "title": "Factor",
+            "type": "number"
+          },
+          "runs": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "same_selection_as_baseline": {
+            "title": "Same Selection As Baseline",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "factor",
+          "best_score",
+          "completion_time",
+          "runs",
+          "same_selection_as_baseline"
+        ],
+        "title": "SensitivityOut",
+        "type": "object"
+      },
+      "StepOut": {
+        "properties": {
+          "from_node": {
+            "title": "From Node",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "travel",
+              "mission",
+              "reset"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "provenance": {
+            "enum": [
+              "modeled",
+              "measured",
+              "planned"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "seconds": {
+            "title": "Seconds",
+            "type": "number"
+          },
+          "to_node": {
+            "title": "To Node",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "from_node",
+          "to_node",
+          "seconds",
+          "provenance"
+        ],
+        "title": "StepOut",
+        "type": "object"
+      },
       "TimingLegOut": {
         "properties": {
           "amount": {
@@ -2940,6 +3285,53 @@
         "title": "ValidationReport",
         "type": "object"
       },
+      "VerdictOut": {
+        "properties": {
+          "counterfactual_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterfactual Score"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "mission": {
+            "title": "Mission",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "selected": {
+            "title": "Selected",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "mission",
+          "selected",
+          "reason",
+          "counterfactual_score",
+          "delta"
+        ],
+        "title": "VerdictOut",
+        "type": "object"
+      },
       "VersionInfo": {
         "properties": {
           "numpy": {
@@ -3154,6 +3546,48 @@
         "summary": "Health",
         "tags": [
           "meta"
+        ]
+      }
+    },
+    "/api/v1/optimize": {
+      "post": {
+        "description": "Choose and order missions to maximise the expected score within the time budget.",
+        "operationId": "optimize_api_v1_optimize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptimizeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Optimize",
+        "tags": [
+          "optimize"
         ]
       }
     },

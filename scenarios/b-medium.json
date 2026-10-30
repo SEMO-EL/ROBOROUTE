@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "id": "b-medium",
+  "name": "Scenario B — Medium field",
+  "description": "Fictional demonstration data. Seven missions on a 236 × 114 cm field; the 90 s budget is too short for all of them, so the optimiser must choose. Not based on any official competition season.",
+  "fictional": true,
+  "arena": {
+    "width": 2.36,
+    "height": 1.14,
+    "grid_resolution": 0.02,
+    "obstacles": [
+      {
+        "id": "dam",
+        "label": "Dam",
+        "kind": "solid",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.85,
+          "cy": 0.75,
+          "width": 0.1,
+          "height": 0.4,
+          "rotation": 0.0
+        }
+      },
+      {
+        "id": "rock",
+        "label": "Rock",
+        "kind": "solid",
+        "shape": {
+          "kind": "circle",
+          "cx": 1.3,
+          "cy": 0.35,
+          "radius": 0.1
+        }
+      },
+      {
+        "id": "pier",
+        "label": "Pier",
+        "kind": "solid",
+        "shape": {
+          "kind": "rect",
+          "cx": 1.75,
+          "cy": 0.8,
+          "width": 0.3,
+          "height": 0.1,
+          "rotation": 0.0
+        }
+      },
+      {
+        "id": "mast",
+        "label": "Mast",
+        "kind": "solid",
+        "shape": {
+          "kind": "circle",
+          "cx": 2.0,
+          "cy": 0.35,
+          "radius": 0.08
+        }
+      },
+      {
+        "id": "marsh",
+        "label": "Marsh (keep out)",
+        "kind": "no_go",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.55,
+          "cy": 1.0,
+          "width": 0.3,
+          "height": 0.12,
+          "rotation": 0.0
+        }
+      }
+    ],
+    "home_zones": [
+      {
+        "id": "home",
+        "label": "Home",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.25,
+          "cy": 0.25,
+          "width": 0.45,
+          "height": 0.45,
+          "rotation": 0.0
+        }
+      }
+    ],
+    "start_pose": {
+      "x": 0.25,
+      "y": 0.25,
+      "theta": 0.0
+    }
+  },
+  "robot": {
+    "name": "Demo driving base",
+    "drive": "differential",
+    "length": 0.2,
+    "width": 0.16,
+    "safety_margin": 0.01,
+    "linear": {
+      "max_speed": 0.25,
+      "acceleration": 0.5,
+      "provenance": "entered"
+    },
+    "angular": {
+      "max_speed": 2.5,
+      "acceleration": 6.0,
+      "provenance": "entered"
+    },
+    "can_reverse": true
+  },
+  "missions": [
+    {
+      "id": "valve",
+      "name": "Open the valve",
+      "description": "",
+      "approach_pose": {
+        "x": 0.6,
+        "y": 0.55,
+        "theta": 1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 6.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.95
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "crane",
+      "name": "Swing the crane",
+      "description": "",
+      "approach_pose": {
+        "x": 1.1,
+        "y": 0.8,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 8.0,
+        "mode": 10.0,
+        "high": 14.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.85
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "solar",
+      "name": "Tilt the solar panel",
+      "description": "",
+      "approach_pose": {
+        "x": 1.55,
+        "y": 0.55,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 6.0,
+        "mode": 8.0,
+        "high": 12.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 9,
+        "attempts": 10
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "lift",
+      "name": "Raise the lift",
+      "description": "",
+      "approach_pose": {
+        "x": 2.1,
+        "y": 0.65,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 12.0,
+        "mode": 15.0,
+        "high": 22.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.7
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "satellite",
+      "name": "Align the satellite",
+      "description": "",
+      "approach_pose": {
+        "x": 1.4,
+        "y": 0.97,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 10.0,
+        "mode": 12.0,
+        "high": 18.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.8
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "drill",
+      "name": "Start the drill",
+      "description": "",
+      "approach_pose": {
+        "x": 0.95,
+        "y": 0.25,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 5.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.9
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "relay",
+      "name": "Push the relay",
+      "description": "",
+      "approach_pose": {
+        "x": 1.75,
+        "y": 0.25,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 9.0,
+        "mode": 11.0,
+        "high": 16.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 6,
+        "attempts": 10
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    }
+  ],
+  "constraints": [],
+  "scoring": {
+    "id": "b-rules",
+    "name": "Scenario B rules (fictional)",
+    "rules": [
+      {
+        "kind": "mission_points",
+        "mission": "valve",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "crane",
+        "points": 30.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "solar",
+        "points": 25.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "lift",
+        "points": 40.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "satellite",
+        "points": 35.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "drill",
+        "points": 15.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "relay",
+        "points": 30.0
+      }
+    ]
+  },
+  "format": {
+    "kind": "single_run",
+    "time_budget": 90.0,
+    "reset_time": 0.0,
+    "must_end_in_home": false
+  },
+  "travel_overrides": []
+}

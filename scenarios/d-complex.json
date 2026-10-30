@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "id": "d-complex",
+  "name": "Scenario D — FLL-style multi-run strategy",
+  "description": "Fictional demonstration data in the style of an FLL Challenge robot game: several runs from home, attachment changes, a mission that requires another, an order constraint, two mutually exclusive missions, a bonus and a failure penalty. Not based on any official competition season.",
+  "fictional": true,
+  "arena": {
+    "width": 2.36,
+    "height": 1.14,
+    "grid_resolution": 0.02,
+    "obstacles": [
+      {
+        "id": "dam",
+        "label": "Dam",
+        "kind": "solid",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.85,
+          "cy": 0.75,
+          "width": 0.1,
+          "height": 0.4,
+          "rotation": 0.0
+        }
+      },
+      {
+        "id": "rock",
+        "label": "Rock",
+        "kind": "solid",
+        "shape": {
+          "kind": "circle",
+          "cx": 1.3,
+          "cy": 0.35,
+          "radius": 0.1
+        }
+      },
+      {
+        "id": "pier",
+        "label": "Pier",
+        "kind": "solid",
+        "shape": {
+          "kind": "rect",
+          "cx": 1.75,
+          "cy": 0.8,
+          "width": 0.3,
+          "height": 0.1,
+          "rotation": 0.0
+        }
+      },
+      {
+        "id": "mast",
+        "label": "Mast",
+        "kind": "solid",
+        "shape": {
+          "kind": "circle",
+          "cx": 2.0,
+          "cy": 0.35,
+          "radius": 0.08
+        }
+      },
+      {
+        "id": "marsh",
+        "label": "Marsh (keep out)",
+        "kind": "no_go",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.55,
+          "cy": 1.0,
+          "width": 0.3,
+          "height": 0.12,
+          "rotation": 0.0
+        }
+      }
+    ],
+    "home_zones": [
+      {
+        "id": "home",
+        "label": "Home",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.25,
+          "cy": 0.25,
+          "width": 0.45,
+          "height": 0.45,
+          "rotation": 0.0
+        }
+      }
+    ],
+    "start_pose": {
+      "x": 0.25,
+      "y": 0.25,
+      "theta": 0.0
+    }
+  },
+  "robot": {
+    "name": "Demo driving base",
+    "drive": "differential",
+    "length": 0.2,
+    "width": 0.16,
+    "safety_margin": 0.01,
+    "linear": {
+      "max_speed": 0.25,
+      "acceleration": 0.5,
+      "provenance": "entered"
+    },
+    "angular": {
+      "max_speed": 2.5,
+      "acceleration": 6.0,
+      "provenance": "entered"
+    },
+    "can_reverse": true
+  },
+  "missions": [
+    {
+      "id": "key",
+      "name": "Collect the key",
+      "description": "Hook the key from its holder.",
+      "approach_pose": {
+        "x": 0.6,
+        "y": 0.55,
+        "theta": 1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 6.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.9
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": "hook"
+    },
+    {
+      "id": "gate",
+      "name": "Open the gate",
+      "description": "Only possible with the key.",
+      "approach_pose": {
+        "x": 1.1,
+        "y": 0.8,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 8.0,
+        "mode": 10.0,
+        "high": 15.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.85
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": "hook"
+    },
+    {
+      "id": "ramp",
+      "name": "Lower the ramp",
+      "description": "",
+      "approach_pose": {
+        "x": 1.55,
+        "y": 0.55,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 6.0,
+        "mode": 8.0,
+        "high": 12.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 8,
+        "attempts": 10
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": "pusher"
+    },
+    {
+      "id": "bridge",
+      "name": "Cross the bridge",
+      "description": "Must follow the ramp if both are done.",
+      "approach_pose": {
+        "x": 2.1,
+        "y": 0.65,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 10.0,
+        "mode": 13.0,
+        "high": 20.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.75
+      },
+      "max_attempts": 2,
+      "retry_time": {
+        "kind": "triangular",
+        "low": 6.0,
+        "mode": 8.0,
+        "high": 12.0
+      },
+      "attachment": "pusher"
+    },
+    {
+      "id": "dock-a",
+      "name": "Dock at bay A",
+      "description": "",
+      "approach_pose": {
+        "x": 1.4,
+        "y": 0.97,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 5.0,
+        "mode": 6.0,
+        "high": 9.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.9
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "dock-b",
+      "name": "Dock at bay B",
+      "description": "Bays A and B are mutually exclusive.",
+      "approach_pose": {
+        "x": 0.95,
+        "y": 0.25,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 5.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.95
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "tree",
+      "name": "Shake the tree",
+      "description": "",
+      "approach_pose": {
+        "x": 1.75,
+        "y": 0.25,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 9.0,
+        "mode": 11.0,
+        "high": 16.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 7,
+        "attempts": 10
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": "arm"
+    },
+    {
+      "id": "beacon",
+      "name": "Light the beacon",
+      "description": "",
+      "approach_pose": {
+        "x": 0.7,
+        "y": 0.25,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 4.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.98
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "requires",
+      "before": "key",
+      "after": "gate",
+      "semantics": "succeeded"
+    },
+    {
+      "kind": "precedes",
+      "before": "ramp",
+      "after": "bridge"
+    },
+    {
+      "kind": "excludes",
+      "a": "dock-a",
+      "b": "dock-b"
+    }
+  ],
+  "scoring": {
+    "id": "d-rules",
+    "name": "Scenario D rules (fictional)",
+    "rules": [
+      {
+        "kind": "mission_points",
+        "mission": "key",
+        "points": 15.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "gate",
+        "points": 30.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "ramp",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "bridge",
+        "points": 35.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "dock-a",
+        "points": 25.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "dock-b",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "tree",
+        "points": 30.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "beacon",
+        "points": 10.0
+      },
+      {
+        "kind": "all_of_bonus",
+        "missions": [
+          "ramp",
+          "bridge"
+        ],
+        "points": 15.0
+      },
+      {
+        "kind": "failure_penalty",
+        "mission": "bridge",
+        "points": 10.0
+      }
+    ]
+  },
+  "format": {
+    "kind": "multi_run",
+    "time_budget": 150.0,
+    "reset_time": 6.0,
+    "must_end_in_home": false
+  },
+  "travel_overrides": []
+}
