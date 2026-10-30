@@ -46,3 +46,8 @@ def cm_to_m(centimetres: float) -> float:
 
 def m_to_cm(metres: float) -> float:
     return metres * 100.0
+
+
+def format_point_cm(p: tuple[float, float]) -> str:
+    """Human-readable position for messages, e.g. ``(100.0 cm, 60.0 cm)``."""
+    return f"({m_to_cm(p[0]):.1f} cm, {m_to_cm(p[1]):.1f} cm)"
