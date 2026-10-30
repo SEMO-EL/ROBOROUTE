@@ -40,8 +40,10 @@ class Plan:
         return False
 
 
-def evaluate(instance: PlanningInstance, runs: Sequence[Sequence[int]]) -> Plan | None:
-    """Time and score of a plan, or None if it breaks any rule or the time budget."""
+def evaluate(
+    instance: PlanningInstance, runs: Sequence[Sequence[int]], enforce_budget: bool = True
+) -> Plan | None:
+    """Time and score of a plan, or None if it breaks any rule (or the budget, if enforced)."""
     if len(runs) > 1 and not instance.multi_run:
         return None
     tau = instance.tau
@@ -80,7 +82,9 @@ def evaluate(instance: PlanningInstance, runs: Sequence[Sequence[int]]) -> Plan 
     if instance.must_end_in_home and current != 0:
         steps.append(Step("travel", float(tau[current, 0]), current, 0))
         elapsed += float(tau[current, 0])
-    if not math.isfinite(elapsed) or elapsed > instance.budget + TOLERANCE:
+    if not math.isfinite(elapsed):
+        return None
+    if enforce_budget and elapsed > instance.budget + TOLERANCE:
         return None
     return Plan(
         runs=tuple(tuple(run) for run in runs),
