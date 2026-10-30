@@ -1,0 +1,38 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from roboroute.engine.scenarios import ScenarioLoadError, list_example_scenarios, load_scenario
+from tests.paths import SCENARIOS_DIR
+
+
+def test_example_directory_contains_scenario_a() -> None:
+    ids = [s.id for s in list_example_scenarios(SCENARIOS_DIR)]
+    assert "a-simple-arena" in ids
+
+
+def test_examples_sorted_by_id() -> None:
+    ids = [s.id for s in list_example_scenarios(SCENARIOS_DIR)]
+    assert ids == sorted(ids)
+
+
+@pytest.mark.parametrize("path", sorted(SCENARIOS_DIR.glob("*.json")), ids=lambda p: p.name)
+def test_every_example_is_valid_and_fictional(path: Path) -> None:
+    scenario = load_scenario(path)
+    assert scenario.fictional is True
+    assert scenario.id == path.stem
+
+
+def test_invalid_file_raises_load_error_with_filename(tmp_path: Path) -> None:
+    bad = tmp_path / "broken.json"
+    bad.write_text(json.dumps({"schema_version": 1, "id": "broken"}), encoding="utf-8")
+    with pytest.raises(ScenarioLoadError, match=r"broken\.json"):
+        load_scenario(bad)
+
+
+def test_non_json_file_raises_load_error(tmp_path: Path) -> None:
+    bad = tmp_path / "garbage.json"
+    bad.write_text("{not json", encoding="utf-8")
+    with pytest.raises(ScenarioLoadError):
+        load_scenario(bad)
