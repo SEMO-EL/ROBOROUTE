@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "id": "c-risk",
+  "name": "Scenario C — Risk versus reward",
+  "description": "Fictional demonstration data. High-value but unreliable missions compete with steady, reliable ones. Compare the expected score with the probability of reaching a target score in the Simulation page. Not based on any official competition season.",
+  "fictional": true,
+  "arena": {
+    "width": 2.36,
+    "height": 1.14,
+    "grid_resolution": 0.02,
+    "obstacles": [
+      {
+        "id": "dam",
+        "label": "Dam",
+        "kind": "solid",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.85,
+          "cy": 0.75,
+          "width": 0.1,
+          "height": 0.4,
+          "rotation": 0.0
+        }
+      },
+      {
+        "id": "rock",
+        "label": "Rock",
+        "kind": "solid",
+        "shape": {
+          "kind": "circle",
+          "cx": 1.3,
+          "cy": 0.35,
+          "radius": 0.1
+        }
+      },
+      {
+        "id": "pier",
+        "label": "Pier",
+        "kind": "solid",
+        "shape": {
+          "kind": "rect",
+          "cx": 1.75,
+          "cy": 0.8,
+          "width": 0.3,
+          "height": 0.1,
+          "rotation": 0.0
+        }
+      },
+      {
+        "id": "mast",
+        "label": "Mast",
+        "kind": "solid",
+        "shape": {
+          "kind": "circle",
+          "cx": 2.0,
+          "cy": 0.35,
+          "radius": 0.08
+        }
+      },
+      {
+        "id": "marsh",
+        "label": "Marsh (keep out)",
+        "kind": "no_go",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.55,
+          "cy": 1.0,
+          "width": 0.3,
+          "height": 0.12,
+          "rotation": 0.0
+        }
+      }
+    ],
+    "home_zones": [
+      {
+        "id": "home",
+        "label": "Home",
+        "shape": {
+          "kind": "rect",
+          "cx": 0.25,
+          "cy": 0.25,
+          "width": 0.45,
+          "height": 0.45,
+          "rotation": 0.0
+        }
+      }
+    ],
+    "start_pose": {
+      "x": 0.25,
+      "y": 0.25,
+      "theta": 0.0
+    }
+  },
+  "robot": {
+    "name": "Demo driving base",
+    "drive": "differential",
+    "length": 0.2,
+    "width": 0.16,
+    "safety_margin": 0.01,
+    "linear": {
+      "max_speed": 0.25,
+      "acceleration": 0.5,
+      "provenance": "entered"
+    },
+    "angular": {
+      "max_speed": 2.5,
+      "acceleration": 6.0,
+      "provenance": "entered"
+    },
+    "can_reverse": true
+  },
+  "missions": [
+    {
+      "id": "jackpot",
+      "name": "Jackpot lift",
+      "description": "Highest value, fails more often than not.",
+      "approach_pose": {
+        "x": 2.1,
+        "y": 0.65,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 14.0,
+        "mode": 18.0,
+        "high": 26.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.45
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "long-shot",
+      "name": "Long-shot satellite",
+      "description": "Succeeded 5 times in 10 practice runs.",
+      "approach_pose": {
+        "x": 1.4,
+        "y": 0.97,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 12.0,
+        "mode": 15.0,
+        "high": 22.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 5,
+        "attempts": 10
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "steady-a",
+      "name": "Steady valve",
+      "description": "Reliable, modest value.",
+      "approach_pose": {
+        "x": 0.6,
+        "y": 0.55,
+        "theta": 1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 6.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.97
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "steady-b",
+      "name": "Steady drill",
+      "description": "Reliable, modest value.",
+      "approach_pose": {
+        "x": 0.95,
+        "y": 0.25,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 6.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.97
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "steady-c",
+      "name": "Steady relay",
+      "description": "Reliable, modest value.",
+      "approach_pose": {
+        "x": 1.75,
+        "y": 0.25,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 6.0,
+        "mode": 7.0,
+        "high": 9.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.97
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "steady-d",
+      "name": "Steady panel",
+      "description": "Succeeded 29 times in 30 practice runs.",
+      "approach_pose": {
+        "x": 1.55,
+        "y": 0.55,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 6.0,
+        "mode": 7.0,
+        "high": 9.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 29,
+        "attempts": 30
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    },
+    {
+      "id": "medium",
+      "name": "Crane swing",
+      "description": "Middle ground.",
+      "approach_pose": {
+        "x": 1.1,
+        "y": 0.8,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 9.0,
+        "mode": 11.0,
+        "high": 15.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.75
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
+    }
+  ],
+  "constraints": [],
+  "scoring": {
+    "id": "c-rules",
+    "name": "Scenario C rules (fictional)",
+    "rules": [
+      {
+        "kind": "mission_points",
+        "mission": "jackpot",
+        "points": 60.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "long-shot",
+        "points": 50.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "steady-a",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "steady-b",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "steady-c",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "steady-d",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "medium",
+        "points": 35.0
+      }
+    ]
+  },
+  "format": {
+    "kind": "single_run",
+    "time_budget": 100.0,
+    "reset_time": 0.0,
+    "must_end_in_home": false
+  },
+  "travel_overrides": []
+}

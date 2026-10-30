@@ -180,6 +180,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/simulate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Simulate Plans
+     * @description Monte Carlo evaluation of one plan, or a fair comparison of up to five plans.
+     */
+    post: operations["simulate_plans_api_v1_simulate_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/version": {
     parameters: {
       query?: never;
@@ -430,6 +450,20 @@ export interface components {
       /** Successes */
       successes: number;
     };
+    /** DifferenceOut */
+    DifferenceOut: {
+      interval: components["schemas"]["IntervalOut"];
+      /** Mean */
+      mean: number;
+      /** Plan */
+      plan: string;
+      /** Reference */
+      reference: string;
+      /** Share Better */
+      share_better: number;
+      /** Share Worse */
+      share_worse: number;
+    };
     /**
      * Empirical
      * @description Resample from measured values (e.g. stopwatch times from practice).
@@ -604,6 +638,20 @@ export interface components {
      * @enum {string}
      */
     Heuristic: "manhattan" | "octile" | "euclidean" | "zero";
+    /** HistogramOut */
+    HistogramOut: {
+      /** Counts */
+      counts: number[];
+      /** Edges */
+      edges: number[];
+    };
+    /** IntervalOut */
+    IntervalOut: {
+      /** High */
+      high: number;
+      /** Low */
+      low: number;
+    };
     /** Issue */
     Issue: {
       /** Code */
@@ -831,6 +879,13 @@ export interface components {
       /** Points */
       points: number;
     };
+    /** MissionRateOut */
+    MissionRateOut: {
+      /** Mission */
+      mission: string;
+      started: components["schemas"]["ProbabilityOut"];
+      succeeded: components["schemas"]["ProbabilityOut"];
+    };
     /**
      * MotionProfile
      * @description Speed limits for one degree of freedom.
@@ -971,6 +1026,41 @@ export interface components {
       /** Steps */
       steps: components["schemas"]["StepOut"][];
     };
+    /** PlanSimulationOut */
+    PlanSimulationOut: {
+      /**
+       * Analytic Expected Score
+       * @description Expected score of this plan under the deterministic planning model
+       */
+      analytic_expected_score: number;
+      completion_histogram: components["schemas"]["HistogramOut"];
+      completion_time: components["schemas"]["SummaryOut"];
+      /** Label */
+      label: string;
+      /** Missions */
+      missions: components["schemas"]["MissionRateOut"][];
+      /**
+       * Planned Time
+       * @description Completion time under the planning model (s)
+       */
+      planned_time: number;
+      probability_cut_off: components["schemas"]["ProbabilityOut"];
+      probability_skipped_for_time: components["schemas"]["ProbabilityOut"];
+      probability_target: components["schemas"]["ProbabilityOut"] | null;
+      /** Runs */
+      runs: string[][];
+      score: components["schemas"]["SummaryOut"];
+      /** Score Ecdf */
+      score_ecdf: [number, number][];
+      score_histogram: components["schemas"]["HistogramOut"];
+    };
+    /** PlanSpec */
+    PlanSpec: {
+      /** Label */
+      label: string;
+      /** Runs */
+      runs: string[][];
+    };
     /** PlanningSettings */
     PlanningSettings: {
       /**
@@ -1045,6 +1135,12 @@ export interface components {
        */
       kind: "precedes";
     };
+    /** ProbabilityOut */
+    ProbabilityOut: {
+      /** Estimate */
+      estimate: number;
+      interval: components["schemas"]["IntervalOut"];
+    };
     /**
      * ProbabilitySuccess
      * @description A per-attempt success probability entered directly.
@@ -1070,6 +1166,14 @@ export interface components {
       kind: "probability";
       /** P */
       p: number;
+    };
+    /** QuantileOut */
+    QuantileOut: {
+      /** Estimate */
+      estimate: number;
+      interval: components["schemas"]["IntervalOut"];
+      /** Q */
+      q: number;
     };
     /**
      * RectShape
@@ -1424,6 +1528,76 @@ export interface components {
       /** Same Selection As Baseline */
       same_selection_as_baseline: boolean;
     };
+    /** SimulateRequest */
+    SimulateRequest: {
+      /**
+       * @default {
+       *       "seed": 0,
+       *       "skip_if_insufficient_time": true,
+       *       "travel_time_cv": 0.1,
+       *       "trials": 10000
+       *     }
+       */
+      config?: components["schemas"]["SimulationConfig"];
+      /** Plans */
+      plans: components["schemas"]["PlanSpec"][];
+      scenario: components["schemas"]["Scenario-Input"];
+    };
+    /** SimulateResponse */
+    SimulateResponse: {
+      /** Assumptions */
+      assumptions: string[];
+      /** Compute Seconds */
+      compute_seconds: number;
+      /** Differences */
+      differences: components["schemas"]["DifferenceOut"][];
+      metadata: components["schemas"]["SimulationMetadata"];
+      /** Plans */
+      plans: components["schemas"]["PlanSimulationOut"][];
+    };
+    /** SimulationConfig */
+    SimulationConfig: {
+      /**
+       * Seed
+       * @default 0
+       */
+      seed?: number;
+      /**
+       * Skip If Insufficient Time
+       * @description Skip a mission when its planned duration no longer fits in the remaining time
+       * @default true
+       */
+      skip_if_insufficient_time?: boolean;
+      /** Target Score */
+      target_score?: number | null;
+      /**
+       * Travel Time Cv
+       * @description Coefficient of variation of each travel leg's time (0 = no travel noise)
+       * @default 0.1
+       */
+      travel_time_cv?: number;
+      /**
+       * Trials
+       * @default 10000
+       */
+      trials?: number;
+    };
+    /** SimulationMetadata */
+    SimulationMetadata: {
+      /** Engine Version */
+      engine_version: string;
+      /**
+       * Input Hash
+       * @description SHA-256 of the canonical request (scenario, plans, config)
+       */
+      input_hash: string;
+      /** Numpy Version */
+      numpy_version: string;
+      /** Seed */
+      seed: number;
+      /** Trials */
+      trials: number;
+    };
     /** StepOut */
     StepOut: {
       /** From Node */
@@ -1442,6 +1616,24 @@ export interface components {
       seconds: number;
       /** To Node */
       to_node: string;
+    };
+    /** SummaryOut */
+    SummaryOut: {
+      /** Maximum */
+      maximum: number;
+      /** Mean */
+      mean: number;
+      mean_ci: components["schemas"]["IntervalOut"];
+      /** Minimum */
+      minimum: number;
+      /** N */
+      n: number;
+      /** Quantiles */
+      quantiles: {
+        [key: string]: components["schemas"]["QuantileOut"];
+      };
+      /** Std */
+      std: number;
     };
     /** TimingLegOut */
     TimingLegOut: {
@@ -1872,6 +2064,39 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ValidationReport"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  simulate_plans_api_v1_simulate_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SimulateRequest"];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SimulateResponse"];
         };
       };
       /** @description Validation Error */

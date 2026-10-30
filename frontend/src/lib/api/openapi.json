@@ -490,6 +490,43 @@
         "title": "CountsSuccess",
         "type": "object"
       },
+      "DifferenceOut": {
+        "properties": {
+          "interval": {
+            "$ref": "#/components/schemas/IntervalOut"
+          },
+          "mean": {
+            "title": "Mean",
+            "type": "number"
+          },
+          "plan": {
+            "title": "Plan",
+            "type": "string"
+          },
+          "reference": {
+            "title": "Reference",
+            "type": "string"
+          },
+          "share_better": {
+            "title": "Share Better",
+            "type": "number"
+          },
+          "share_worse": {
+            "title": "Share Worse",
+            "type": "number"
+          }
+        },
+        "required": [
+          "plan",
+          "reference",
+          "mean",
+          "interval",
+          "share_better",
+          "share_worse"
+        ],
+        "title": "DifferenceOut",
+        "type": "object"
+      },
       "Empirical-Input": {
         "additionalProperties": false,
         "description": "Resample from measured values (e.g. stopwatch times from practice).",
@@ -890,6 +927,48 @@
         ],
         "title": "Heuristic",
         "type": "string"
+      },
+      "HistogramOut": {
+        "properties": {
+          "counts": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Counts",
+            "type": "array"
+          },
+          "edges": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Edges",
+            "type": "array"
+          }
+        },
+        "required": [
+          "edges",
+          "counts"
+        ],
+        "title": "HistogramOut",
+        "type": "object"
+      },
+      "IntervalOut": {
+        "properties": {
+          "high": {
+            "title": "High",
+            "type": "number"
+          },
+          "low": {
+            "title": "Low",
+            "type": "number"
+          }
+        },
+        "required": [
+          "low",
+          "high"
+        ],
+        "title": "IntervalOut",
+        "type": "object"
       },
       "Issue": {
         "additionalProperties": false,
@@ -1493,6 +1572,27 @@
         "title": "MissionPoints",
         "type": "object"
       },
+      "MissionRateOut": {
+        "properties": {
+          "mission": {
+            "title": "Mission",
+            "type": "string"
+          },
+          "started": {
+            "$ref": "#/components/schemas/ProbabilityOut"
+          },
+          "succeeded": {
+            "$ref": "#/components/schemas/ProbabilityOut"
+          }
+        },
+        "required": [
+          "mission",
+          "started",
+          "succeeded"
+        ],
+        "title": "MissionRateOut",
+        "type": "object"
+      },
       "MotionProfile-Input": {
         "additionalProperties": false,
         "description": "Speed limits for one degree of freedom.\n\nFor translation: ``max_speed`` in m/s and ``acceleration`` in m/s\u00b2.\nFor rotation: ``max_speed`` in rad/s and ``acceleration`` in rad/s\u00b2.\n``acceleration = None`` means a constant-speed model (instant start and stop).\n\n``provenance`` records where the numbers came from: ``calibrated`` (fitted from the user's\nmeasurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).",
@@ -1848,6 +1948,132 @@
         "title": "PlanOut",
         "type": "object"
       },
+      "PlanSimulationOut": {
+        "properties": {
+          "analytic_expected_score": {
+            "description": "Expected score of this plan under the deterministic planning model",
+            "title": "Analytic Expected Score",
+            "type": "number"
+          },
+          "completion_histogram": {
+            "$ref": "#/components/schemas/HistogramOut"
+          },
+          "completion_time": {
+            "$ref": "#/components/schemas/SummaryOut"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "missions": {
+            "items": {
+              "$ref": "#/components/schemas/MissionRateOut"
+            },
+            "title": "Missions",
+            "type": "array"
+          },
+          "planned_time": {
+            "description": "Completion time under the planning model (s)",
+            "title": "Planned Time",
+            "type": "number"
+          },
+          "probability_cut_off": {
+            "$ref": "#/components/schemas/ProbabilityOut"
+          },
+          "probability_skipped_for_time": {
+            "$ref": "#/components/schemas/ProbabilityOut"
+          },
+          "probability_target": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProbabilityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "runs": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "score": {
+            "$ref": "#/components/schemas/SummaryOut"
+          },
+          "score_ecdf": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Score Ecdf",
+            "type": "array"
+          },
+          "score_histogram": {
+            "$ref": "#/components/schemas/HistogramOut"
+          }
+        },
+        "required": [
+          "label",
+          "runs",
+          "score",
+          "completion_time",
+          "probability_cut_off",
+          "probability_skipped_for_time",
+          "probability_target",
+          "score_histogram",
+          "completion_histogram",
+          "score_ecdf",
+          "missions",
+          "analytic_expected_score",
+          "planned_time"
+        ],
+        "title": "PlanSimulationOut",
+        "type": "object"
+      },
+      "PlanSpec": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "runs": {
+            "items": {
+              "items": {
+                "pattern": "^[A-Za-z0-9_-]{1,64}$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "maxItems": 20,
+            "title": "Runs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "label",
+          "runs"
+        ],
+        "title": "PlanSpec",
+        "type": "object"
+      },
       "PlanningSettings": {
         "additionalProperties": false,
         "properties": {
@@ -1992,6 +2218,23 @@
         "title": "Precedes",
         "type": "object"
       },
+      "ProbabilityOut": {
+        "properties": {
+          "estimate": {
+            "title": "Estimate",
+            "type": "number"
+          },
+          "interval": {
+            "$ref": "#/components/schemas/IntervalOut"
+          }
+        },
+        "required": [
+          "estimate",
+          "interval"
+        ],
+        "title": "ProbabilityOut",
+        "type": "object"
+      },
       "ProbabilitySuccess-Input": {
         "additionalProperties": false,
         "description": "A per-attempt success probability entered directly.",
@@ -2037,6 +2280,28 @@
           "p"
         ],
         "title": "ProbabilitySuccess",
+        "type": "object"
+      },
+      "QuantileOut": {
+        "properties": {
+          "estimate": {
+            "title": "Estimate",
+            "type": "number"
+          },
+          "interval": {
+            "$ref": "#/components/schemas/IntervalOut"
+          },
+          "q": {
+            "title": "Q",
+            "type": "number"
+          }
+        },
+        "required": [
+          "q",
+          "estimate",
+          "interval"
+        ],
+        "title": "QuantileOut",
         "type": "object"
       },
       "RectShape-Input": {
@@ -2919,6 +3184,161 @@
         "title": "SensitivityOut",
         "type": "object"
       },
+      "SimulateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/SimulationConfig",
+            "default": {
+              "seed": 0,
+              "skip_if_insufficient_time": true,
+              "travel_time_cv": 0.1,
+              "trials": 10000
+            }
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanSpec"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Plans",
+            "type": "array"
+          },
+          "scenario": {
+            "$ref": "#/components/schemas/Scenario-Input"
+          }
+        },
+        "required": [
+          "scenario",
+          "plans"
+        ],
+        "title": "SimulateRequest",
+        "type": "object"
+      },
+      "SimulateResponse": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "compute_seconds": {
+            "title": "Compute Seconds",
+            "type": "number"
+          },
+          "differences": {
+            "items": {
+              "$ref": "#/components/schemas/DifferenceOut"
+            },
+            "title": "Differences",
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/SimulationMetadata"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanSimulationOut"
+            },
+            "title": "Plans",
+            "type": "array"
+          }
+        },
+        "required": [
+          "plans",
+          "differences",
+          "metadata",
+          "assumptions",
+          "compute_seconds"
+        ],
+        "title": "SimulateResponse",
+        "type": "object"
+      },
+      "SimulationConfig": {
+        "additionalProperties": false,
+        "properties": {
+          "seed": {
+            "default": 0,
+            "maximum": 4294967295.0,
+            "minimum": 0.0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "skip_if_insufficient_time": {
+            "default": true,
+            "description": "Skip a mission when its planned duration no longer fits in the remaining time",
+            "title": "Skip If Insufficient Time",
+            "type": "boolean"
+          },
+          "target_score": {
+            "anyOf": [
+              {
+                "maximum": 100000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Score"
+          },
+          "travel_time_cv": {
+            "default": 0.1,
+            "description": "Coefficient of variation of each travel leg's time (0 = no travel noise)",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Travel Time Cv",
+            "type": "number"
+          },
+          "trials": {
+            "default": 10000,
+            "maximum": 50000.0,
+            "minimum": 1.0,
+            "title": "Trials",
+            "type": "integer"
+          }
+        },
+        "title": "SimulationConfig",
+        "type": "object"
+      },
+      "SimulationMetadata": {
+        "properties": {
+          "engine_version": {
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "input_hash": {
+            "description": "SHA-256 of the canonical request (scenario, plans, config)",
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "numpy_version": {
+            "title": "Numpy Version",
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "engine_version",
+          "numpy_version",
+          "seed",
+          "trials",
+          "input_hash"
+        ],
+        "title": "SimulationMetadata",
+        "type": "object"
+      },
       "StepOut": {
         "properties": {
           "from_node": {
@@ -2960,6 +3380,51 @@
           "provenance"
         ],
         "title": "StepOut",
+        "type": "object"
+      },
+      "SummaryOut": {
+        "properties": {
+          "maximum": {
+            "title": "Maximum",
+            "type": "number"
+          },
+          "mean": {
+            "title": "Mean",
+            "type": "number"
+          },
+          "mean_ci": {
+            "$ref": "#/components/schemas/IntervalOut"
+          },
+          "minimum": {
+            "title": "Minimum",
+            "type": "number"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "quantiles": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/QuantileOut"
+            },
+            "title": "Quantiles",
+            "type": "object"
+          },
+          "std": {
+            "title": "Std",
+            "type": "number"
+          }
+        },
+        "required": [
+          "n",
+          "mean",
+          "mean_ci",
+          "std",
+          "minimum",
+          "maximum",
+          "quantiles"
+        ],
+        "title": "SummaryOut",
         "type": "object"
       },
       "TimingLegOut": {
@@ -3758,6 +4223,48 @@
         "summary": "Validate Scenario",
         "tags": [
           "scenarios"
+        ]
+      }
+    },
+    "/api/v1/simulate": {
+      "post": {
+        "description": "Monte Carlo evaluation of one plan, or a fair comparison of up to five plans.",
+        "operationId": "simulate_plans_api_v1_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Simulate Plans",
+        "tags": [
+          "simulate"
         ]
       }
     },
