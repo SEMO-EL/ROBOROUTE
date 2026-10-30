@@ -110,3 +110,60 @@ def scenario_payloads(draw: st.DrawFn, max_missions: int = 6) -> dict[str, Any]:
 @st.composite
 def scenarios(draw: st.DrawFn, max_missions: int = 6) -> Scenario:
     return Scenario.model_validate(draw(scenario_payloads(max_missions=max_missions)))
+
+
+@st.composite
+def planning_instances(draw: st.DrawFn, max_n: int = 6):  # type: ignore[no-untyped-def]
+    """Random planning instances with constraints, attachments and both match formats.
+
+    Constraints only point from lower to higher index, so the precedence graph is acyclic.
+    """
+    import numpy as np
+
+    from roboroute.engine.optimization.instance import PlanningInstance
+
+    n = draw(st.integers(min_value=0, max_value=max_n))
+    size = n + 1
+    tau = np.array(
+        [[0.0 if a == b else draw(fl(0.5, 20.0)) for b in range(size)] for a in range(size)]
+    )
+    duration = np.array([draw(fl(0.0, 25.0)) for _ in range(n)])
+    p = np.array([draw(st.sampled_from([0.0, 0.3, 0.7, 0.95, 1.0])) for _ in range(n)])
+    requires = [0] * n
+    after = [0] * n
+    excludes = [0] * n
+    for later in range(n):
+        for earlier in range(later):
+            kind = draw(st.sampled_from(["none"] * 6 + ["requires", "precedes", "excludes"]))
+            if kind in ("requires", "precedes"):
+                after[earlier] |= 1 << later
+                if kind == "requires":
+                    requires[later] |= 1 << earlier
+            elif kind == "excludes":
+                excludes[earlier] |= 1 << later
+                excludes[later] |= 1 << earlier
+    attachment = [draw(st.integers(min_value=0, max_value=2)) for _ in range(n)]
+    weight = np.array([draw(st.integers(0, 60)) * float(p[i]) for i in range(n)])
+    bonuses = []
+    if n >= 2 and draw(st.booleans()):
+        a, b = draw(st.lists(st.integers(0, n - 1), min_size=2, max_size=2, unique=True))
+        bonuses.append(((1 << a) | (1 << b), float(draw(st.integers(1, 40)))))
+    multi_run = draw(st.booleans())
+    return PlanningInstance(
+        ids=[f"m{i}" for i in range(n)],
+        names=[f"Mission {i}" for i in range(n)],
+        tau=tau,
+        duration=duration,
+        p_eventual=p,
+        requires_mask=requires,
+        after_mask=after,
+        excludes_mask=excludes,
+        attachment=attachment,
+        attachments=["arm", "hook"],
+        budget=draw(fl(5.0, 120.0)),
+        multi_run=multi_run,
+        reset_time=draw(fl(0.0, 8.0)) if multi_run else 0.0,
+        must_end_in_home=draw(st.booleans()),
+        weight=weight,
+        bonuses=bonuses,
+    )
