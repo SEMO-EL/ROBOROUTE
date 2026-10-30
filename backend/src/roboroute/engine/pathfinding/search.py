@@ -18,6 +18,13 @@ from roboroute.engine.grid.occupancy import Cell, OccupancyGrid
 from roboroute.engine.pathfinding.heuristics import Heuristic, estimate, is_admissible
 from roboroute.engine.pathfinding.trace import Tracer
 
+# Heap keys are rounded to this many decimals (metres). Costs are sums of h and h√2 in floating
+# point, so cells that are equally good in exact arithmetic can differ by ~1e-15; without
+# rounding those differences decide the order instead of the tie-breaking rule (prefer smaller
+# h), and A* expands many unnecessary cells (experiment 1). Rounding to 1 nm cannot change which
+# path is shortest by any physically meaningful amount.
+KEY_DECIMALS = 9
+
 
 @dataclass(frozen=True)
 class SearchResult:
@@ -68,20 +75,23 @@ def astar(
     parent: dict[Cell, Cell | None] = {start: None}
     closed: set[Cell] = set()
     h0 = h_of(start)
-    frontier: list[tuple[float, float, int, Cell]] = [(h0, h0, 0, start)]
+    frontier: list[tuple[float, float, int, Cell]] = [
+        (round(h0, KEY_DECIMALS), round(h0, KEY_DECIMALS), 0, start)
+    ]
     counter = 1
     expanded = 0
     max_frontier = 1
 
     while frontier:
-        f, h_value, _, cell = heapq.heappop(frontier)
+        _, _, _, cell = heapq.heappop(frontier)
         if cell in closed:
             continue  # stale entry left behind by lazy deletion
         closed.add(cell)
         expanded += 1
         g_cell = g[cell]
         if tracer is not None:
-            tracer.on_expand(cell, g_cell, h_value, f)
+            h_cell_value = h_of(cell)
+            tracer.on_expand(cell, g_cell, h_cell_value, g_cell + h_cell_value)
         if cell == goal:
             path = _reconstruct(parent, goal)
             return SearchResult(path, g_cell, expanded, counter, max_frontier, guaranteed, name)
@@ -93,7 +103,8 @@ def astar(
                 g[neighbor] = candidate
                 parent[neighbor] = cell
                 h_n = h_of(neighbor)
-                heapq.heappush(frontier, (candidate + h_n, h_n, counter, neighbor))
+                key = (round(candidate + h_n, KEY_DECIMALS), round(h_n, KEY_DECIMALS))
+                heapq.heappush(frontier, (*key, counter, neighbor))
                 counter += 1
                 if tracer is not None:
                     tracer.on_push(neighbor, cell, candidate, h_n, candidate + h_n)

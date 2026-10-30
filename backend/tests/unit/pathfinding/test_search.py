@@ -140,3 +140,16 @@ def test_costs_match_networkx(mask: NDArray[np.bool_], data: st.DataObject) -> N
             assert astar(grid, start, goal, heuristic, connectivity).cost == pytest.approx(expected)
         tree = dijkstra(grid, start, [goal], connectivity)
         assert tree.dist.get(goal, math.inf) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize("side", [50, 200, 300])
+def test_octile_on_empty_grid_expands_only_the_path(side: int) -> None:
+    """With an exact heuristic, A* should expand only cells on the path.
+
+    Regression test: summing h√2 in floating point gave f values that differed by ~1e-15 for
+    equally good cells, which defeated the tie-breaking and expanded up to 28× more cells.
+    """
+    grid = OccupancyGrid.from_mask(np.ones((side, side), dtype=bool), 0.01)
+    result = astar(grid, (2, 3), (side - 3, int(side * 0.6)), Heuristic.OCTILE, 8)
+    assert result.path is not None
+    assert result.expanded == len(result.path)
