@@ -6,11 +6,9 @@ import { placeLabels } from "./labels";
 
 type Shape = Model<"RectShape"> | Model<"CircleShape">;
 
-export type Selection =
-  | { kind: "mission"; id: string }
-  | { kind: "obstacle"; id: string }
-  | { kind: "zone"; id: string }
-  | null;
+import type { Selection } from "./selection";
+
+export type { Selection };
 
 const RAD_TO_DEG = 180 / Math.PI;
 const GRID_MIN_CELL_PX = 6;
