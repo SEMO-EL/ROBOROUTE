@@ -34,6 +34,10 @@ class Robot(StrictModel):
     safety_margin: NonNegativeLength = 0.0
     linear: MotionProfile
     angular: MotionProfile
+    can_reverse: bool = Field(
+        default=True,
+        description="Whether the robot may drive backwards instead of turning around",
+    )
 
     @property
     def footprint_radius(self) -> float:

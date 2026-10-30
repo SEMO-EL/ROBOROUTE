@@ -95,7 +95,8 @@
       "max_speed": 2.5,
       "acceleration": 6.0,
       "provenance": "entered"
-    }
+    },
+    "can_reverse": true
   },
   "missions": [
     {

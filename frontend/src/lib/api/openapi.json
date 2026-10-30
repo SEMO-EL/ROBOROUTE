@@ -876,6 +876,12 @@
           "angular": {
             "$ref": "#/components/schemas/MotionProfile"
           },
+          "can_reverse": {
+            "default": true,
+            "description": "Whether the robot may drive backwards instead of turning around",
+            "title": "Can Reverse",
+            "type": "boolean"
+          },
           "drive": {
             "const": "differential",
             "default": "differential",
@@ -918,7 +924,8 @@
           "width",
           "safety_margin",
           "linear",
-          "angular"
+          "angular",
+          "can_reverse"
         ],
         "title": "Robot",
         "type": "object"

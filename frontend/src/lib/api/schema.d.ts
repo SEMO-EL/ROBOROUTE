@@ -505,6 +505,12 @@ export interface components {
     Robot: {
       angular: components["schemas"]["MotionProfile"];
       /**
+       * Can Reverse
+       * @description Whether the robot may drive backwards instead of turning around
+       * @default true
+       */
+      can_reverse: boolean;
+      /**
        * Drive
        * @default differential
        * @constant
