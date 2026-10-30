@@ -36,3 +36,21 @@ export function optimize(client: ApiClient, scenario: Scenario) {
 }
 
 export type OptimizeResult = Awaited<ReturnType<typeof optimize>>;
+
+export interface SimulateBody {
+  scenario: Scenario;
+  plans: { label: string; runs: string[][] }[];
+  config: {
+    trials: number;
+    seed: number;
+    travel_time_cv: number;
+    skip_if_insufficient_time: boolean;
+    target_score: number | null;
+  };
+}
+
+export function simulate(client: ApiClient, body: SimulateBody) {
+  return unwrap(client.POST("/api/v1/simulate", { body }));
+}
+
+export type SimulateResult = Awaited<ReturnType<typeof simulate>>;

@@ -33,7 +33,7 @@ export const OPTIMIZE_RESULT: OptimizeResult = {
   excluded: [{ mission: "ghost", reason: "Mission 'ghost' needs 130.0 s even on its own." }],
   warnings: [],
   optimal: plan([["beacon", "bridge"]], 54.5, 47.2),
-  alternatives: [plan([["bridge"]], 28, 30)],
+  alternatives: [plan([["bridge"]], 28, 30), plan([["beacon"]], 19, 12)],
   greedy: plan([["beacon"]], 19, 10),
   explanation: {
     budget: 120,

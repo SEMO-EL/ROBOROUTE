@@ -96,16 +96,36 @@ def summarize(values: FloatArray) -> Summary:
     )
 
 
+def _integer_step(values: FloatArray) -> int | None:
+    """Greatest common divisor of whole-number values (e.g. 5 if every score is a multiple of 5)."""
+    if not np.allclose(values, np.round(values)):
+        return None
+    distinct = np.unique(np.round(values).astype(np.int64))
+    if distinct.size < 2:
+        return None
+    return int(np.gcd.reduce(np.diff(distinct)))
+
+
 def histogram(values: FloatArray, max_bins: int = 40) -> tuple[list[float], list[int]]:
-    """Bins for display. Scores are often multiples of 5 points, so whole-number-width bins
-    aligned to the data are used when they fit; otherwise NumPy's automatic rule, capped."""
+    """Bins for display.
+
+    Competition scores move in fixed steps (often 5 points). For whole-number data the bin width is
+    a multiple of that step, so bins are never systematically empty; otherwise NumPy's automatic
+    rule is used, capped at ``max_bins``.
+    """
     low, high = float(values.min()), float(values.max())
     if low == high:
         return [low - 0.5, high + 0.5], [int(values.size)]
-    span = high - low
-    width = max(1.0, math.ceil(span / max_bins))
-    if span / width <= max_bins:
-        edges = np.arange(math.floor(low), math.floor(high) + width + 1e-9, width, dtype=float)
+    step = _integer_step(values)
+    if step is not None:
+        width = step * max(1, math.ceil((high - low) / step / max_bins))
+        start = math.floor(low / width) * width
+        edges = np.arange(start, high + width + 1e-9, width, dtype=float)
+        # Centre each step value inside its bin rather than on a bin edge.
+        if width == step:
+            edges = edges - step / 2
+            if edges[-1] < high + step / 2 - 1e-9:
+                edges = np.append(edges, edges[-1] + width)
     else:
         edges = np.histogram_bin_edges(values, bins=max_bins)
     counts, edges = np.histogram(values, bins=edges)

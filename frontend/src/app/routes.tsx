@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 
 import { ArenaPage } from "@/features/arena/ArenaPage";
 import { OverviewPage } from "@/features/overview/OverviewPage";
+import { SimulationPage } from "@/features/simulation/SimulationPage";
 import { StrategyPage } from "@/features/strategy/StrategyPage";
 
 import { Shell } from "./Shell";
@@ -14,6 +15,7 @@ export const router = createBrowserRouter([
       { index: true, element: <OverviewPage /> },
       { path: "arena", element: <ArenaPage /> },
       { path: "strategy", element: <StrategyPage /> },
+      { path: "simulation", element: <SimulationPage /> },
     ],
   },
 ]);

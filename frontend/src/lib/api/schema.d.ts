@@ -191,7 +191,7 @@ export interface paths {
     put?: never;
     /**
      * Simulate Plans
-     * @description Monte Carlo evaluation of one plan, or a fair comparison of up to five plans.
+     * @description Monte Carlo evaluation of one plan, or a fair comparison of up to three plans.
      */
     post: operations["simulate_plans_api_v1_simulate_post"];
     delete?: never;

@@ -15,7 +15,7 @@ from roboroute.engine.optimization.instance import PlanningInstance
 from roboroute.engine.simulation.runner import SimulationTrials, simulate
 from roboroute.engine.stats.summary import Interval, mean_ci
 
-MAX_COMPARED_PLANS = 5
+MAX_COMPARED_PLANS = 3  # charts compare plans by colour; only 3 hues stay distinguishable
 
 
 @dataclass(frozen=True)

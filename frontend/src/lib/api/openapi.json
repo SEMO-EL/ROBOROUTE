@@ -3200,7 +3200,7 @@
             "items": {
               "$ref": "#/components/schemas/PlanSpec"
             },
-            "maxItems": 5,
+            "maxItems": 3,
             "minItems": 1,
             "title": "Plans",
             "type": "array"
@@ -4228,7 +4228,7 @@
     },
     "/api/v1/simulate": {
       "post": {
-        "description": "Monte Carlo evaluation of one plan, or a fair comparison of up to five plans.",
+        "description": "Monte Carlo evaluation of one plan, or a fair comparison of up to three plans.",
         "operationId": "simulate_plans_api_v1_simulate_post",
         "requestBody": {
           "content": {

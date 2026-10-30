@@ -1,3 +1,4 @@
+import itertools
 import math
 
 import numpy as np
@@ -78,3 +79,12 @@ def test_ecdf_is_monotone_and_ends_at_one() -> None:
     ys = [y for _, y in points]
     assert ys == sorted(ys)
     assert ys[-1] == pytest.approx(1.0)
+
+
+def test_histogram_bins_follow_the_score_step() -> None:
+    """Scores that are all multiples of 5 get 5-point bins, not mostly-empty 1-point bins."""
+    values = np.array([0, 20, 35, 55, 60, 95, 120], dtype=float)
+    edges, counts = histogram(values)
+    widths = {round(b - a, 9) for a, b in itertools.pairwise(edges)}
+    assert widths == {5.0}
+    assert sum(counts) == values.size

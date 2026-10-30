@@ -31,6 +31,14 @@
   --color-warning: #fbbf24;
   --color-danger: #f87171;
 
+  /* Chart series (categorical, fixed order). Validated with the dataviz palette checker on the
+     dark surface for all-pairs use (lines that cross): only three slots pass, so charts compare
+     at most three plans. */
+  --color-series-1: #3987e5;
+  --color-series-2: #d95926;
+  --color-series-3: #199e70;
+  --color-chart-grid: #1f2b44;
+
   /* Arena drawing */
   --color-field: #0e192b;
   --color-grid: #1a2740;

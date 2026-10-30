@@ -19,7 +19,7 @@ class SimulateRequest(BaseModel):
     model_config = {"extra": "forbid"}
 
     scenario: Scenario
-    plans: list[PlanSpec] = Field(min_length=1, max_length=5)
+    plans: list[PlanSpec] = Field(min_length=1, max_length=3)
     config: SimulationConfig = SimulationConfig()
 
 

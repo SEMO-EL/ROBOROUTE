@@ -49,7 +49,7 @@ def _probability(flags: numpy.typing.NDArray[numpy.bool_]) -> ProbabilityOut:
 
 @router.post("/simulate")
 def simulate_plans(request: SimulateRequest) -> SimulateResponse:
-    """Monte Carlo evaluation of one plan, or a fair comparison of up to five plans."""
+    """Monte Carlo evaluation of one plan, or a fair comparison of up to three plans."""
     started = time.perf_counter()
     config = request.config
     total = config.trials * len(request.plans)
