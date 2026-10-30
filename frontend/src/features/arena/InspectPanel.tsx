@@ -97,7 +97,7 @@ function Legend() {
   );
 }
 
-export function PropertiesPanel({
+export function InspectPanel({
   scenario,
   selection,
 }: {
@@ -152,14 +152,11 @@ export function PropertiesPanel({
   }
 
   return (
-    <aside
-      aria-label="Properties"
-      className="flex w-72 shrink-0 flex-col gap-6 overflow-y-auto border-l border-border bg-surface p-4"
-    >
+    <div className="flex flex-col gap-6">
       {content ?? (
         <p className="text-muted">Select a mission, obstacle or home zone to inspect it.</p>
       )}
       <Legend />
-    </aside>
+    </div>
   );
 }

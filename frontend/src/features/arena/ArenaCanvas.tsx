@@ -1,5 +1,12 @@
 import { Grid3x3, Maximize, Minus, Plus } from "lucide-react";
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 
 import { useElementSize } from "@/hooks/useElementSize";
 import type { Scenario } from "@/lib/api/client";
@@ -17,9 +24,11 @@ interface ArenaCanvasProps {
   scenario: Scenario;
   selection: Selection;
   onSelect: (selection: Selection) => void;
+  /** Extra layers drawn in arena coordinates (metres, y up), above obstacles. */
+  arenaLayers?: ReactNode;
 }
 
-export function ArenaCanvas({ scenario, selection, onSelect }: ArenaCanvasProps) {
+export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: ArenaCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const size = useElementSize(containerRef);
   const { viewport, fit, zoom, pan } = useViewport(
@@ -146,6 +155,14 @@ export function ArenaCanvas({ scenario, selection, onSelect }: ArenaCanvasProps)
             selection={selection}
             onSelect={onSelect}
           />
+          {arenaLayers && (
+            <g
+              pointerEvents="none"
+              transform={`matrix(${viewport.zoom} 0 0 ${-viewport.zoom} ${viewport.panX} ${viewport.panY})`}
+            >
+              {arenaLayers}
+            </g>
+          )}
           <ArenaOverlay
             scenario={scenario}
             viewport={viewport}
