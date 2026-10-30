@@ -30,3 +30,9 @@ export function fetchGrid(client: ApiClient, scenario: Scenario) {
 
 export type RouteResult = Awaited<ReturnType<typeof planRoute>>;
 export type GridResult = Awaited<ReturnType<typeof fetchGrid>>;
+
+export function optimize(client: ApiClient, scenario: Scenario) {
+  return unwrap(client.POST("/api/v1/optimize", { body: { scenario } }));
+}
+
+export type OptimizeResult = Awaited<ReturnType<typeof optimize>>;

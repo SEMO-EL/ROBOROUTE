@@ -349,12 +349,12 @@ export interface components {
        * Must End In Home
        * @default false
        */
-      must_end_in_home: boolean;
+      must_end_in_home?: boolean;
       /**
        * Reset Time
        * @default 0
        */
-      reset_time: number;
+      reset_time?: number;
       /**
        * Time Budget
        * @description Match length in seconds
@@ -724,7 +724,7 @@ export interface components {
        * Description
        * @default
        */
-      description: string;
+      description?: string;
       /** Execution Time */
       execution_time:
         | components["schemas"]["Fixed-Input"]
@@ -737,7 +737,7 @@ export interface components {
        * Max Attempts
        * @default 1
        */
-      max_attempts: number;
+      max_attempts?: number;
       /** Name */
       name: string;
       /** Retry Time */
@@ -852,7 +852,7 @@ export interface components {
        * @default entered
        * @enum {string}
        */
-      provenance: "calibrated" | "entered" | "reference";
+      provenance?: "calibrated" | "entered" | "reference";
     };
     /**
      * MotionProfile
@@ -893,7 +893,7 @@ export interface components {
        * @default solid
        * @enum {string}
        */
-      kind: "solid" | "no_go";
+      kind?: "solid" | "no_go";
       /** Label */
       label: string;
       /** Shape */
@@ -936,7 +936,7 @@ export interface components {
        *       "top_k": 5
        *     }
        */
-      settings: components["schemas"]["PlanningSettings"];
+      settings?: components["schemas"]["PlanningSettings"];
     };
     /** OptimizeResponse */
     OptimizeResponse: {
@@ -983,7 +983,7 @@ export interface components {
        * @description How many alternative plans to return
        * @default 5
        */
-      top_k: number;
+      top_k?: number;
     };
     /**
      * Pose
@@ -994,7 +994,7 @@ export interface components {
        * Theta
        * @default 0
        */
-      theta: number;
+      theta?: number;
       /** X */
       x: number;
       /** Y */
@@ -1091,7 +1091,7 @@ export interface components {
        * Rotation
        * @default 0
        */
-      rotation: number;
+      rotation?: number;
       /** Width */
       width: number;
     };
@@ -1141,7 +1141,7 @@ export interface components {
        * @default succeeded
        * @enum {string}
        */
-      semantics: "attempted" | "succeeded";
+      semantics?: "attempted" | "succeeded";
     };
     /**
      * Requires
@@ -1175,13 +1175,13 @@ export interface components {
        * @description Whether the robot may drive backwards instead of turning around
        * @default true
        */
-      can_reverse: boolean;
+      can_reverse?: boolean;
       /**
        * Drive
        * @default differential
        * @constant
        */
-      drive: "differential";
+      drive?: "differential";
       /** Length */
       length: number;
       linear: components["schemas"]["MotionProfile-Input"];
@@ -1191,7 +1191,7 @@ export interface components {
        * Safety Margin
        * @default 0
        */
-      safety_margin: number;
+      safety_margin?: number;
       /** Width */
       width: number;
     };
@@ -1230,20 +1230,20 @@ export interface components {
        * @default astar
        * @enum {string}
        */
-      algorithm: "astar" | "dijkstra";
+      algorithm?: "astar" | "dijkstra";
       /**
        * Connectivity
        * @default 8
        * @enum {integer}
        */
-      connectivity: 4 | 8;
+      connectivity?: 4 | 8;
       /** @default octile */
-      heuristic: components["schemas"]["Heuristic"];
+      heuristic?: components["schemas"]["Heuristic"];
       /**
        * Smooth
        * @default true
        */
-      smooth: boolean;
+      smooth?: boolean;
     };
     /** RouteRequest */
     RouteRequest: {
@@ -1253,7 +1253,7 @@ export interface components {
        * Include Trace
        * @default false
        */
-      include_trace: boolean;
+      include_trace?: boolean;
       /**
        * @default {
        *       "algorithm": "astar",
@@ -1262,7 +1262,7 @@ export interface components {
        *       "smooth": true
        *     }
        */
-      options: components["schemas"]["RouteOptions"];
+      options?: components["schemas"]["RouteOptions"];
       scenario: components["schemas"]["Scenario-Input"];
       /** To Node */
       to_node: string;
@@ -1270,7 +1270,7 @@ export interface components {
        * Trace Limit
        * @default 20000
        */
-      trace_limit: number;
+      trace_limit?: number;
     };
     /** RouteResponse */
     RouteResponse: {
@@ -1306,7 +1306,7 @@ export interface components {
        * Description
        * @default
        */
-      description: string;
+      description?: string;
       /**
        * Fictional
        * @description True when the data is invented for demonstration, not an official ruleset
@@ -1325,7 +1325,7 @@ export interface components {
        * @default 1
        * @constant
        */
-      schema_version: 1;
+      schema_version?: 1;
       scoring: components["schemas"]["ScoringProfile-Input"];
       /** Travel Overrides */
       travel_overrides?: components["schemas"]["TravelOverride"][];

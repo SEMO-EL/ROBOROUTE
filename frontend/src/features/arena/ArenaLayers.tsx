@@ -2,6 +2,8 @@ import type { Model, Scenario } from "@/lib/api/client";
 import { arenaToScreen, type Viewport } from "@/lib/geometry/viewport";
 import { footprintRadius } from "@/lib/robot/footprint";
 
+import { placeLabels } from "./labels";
+
 type Shape = Model<"RectShape"> | Model<"CircleShape">;
 
 export type Selection =
@@ -175,6 +177,12 @@ export function ArenaOverlay({ scenario, viewport, selection, onSelect }: Layers
   const start = arenaToScreen(viewport, scenario.arena.start_pose);
   const startTip = headingTip(start.x, start.y, scenario.arena.start_pose.theta, 16);
   const origin = arenaToScreen(viewport, { x: 0, y: 0 });
+  const labels = placeLabels(
+    scenario.missions.map((mission) => ({
+      ...arenaToScreen(viewport, mission.approach_pose),
+      text: mission.name,
+    })),
+  );
 
   return (
     <g>
@@ -193,8 +201,9 @@ export function ArenaOverlay({ scenario, viewport, selection, onSelect }: Layers
         />
         <circle cx={start.x} cy={start.y} r={4} className="fill-start" />
       </g>
-      {scenario.missions.map((mission) => {
+      {scenario.missions.map((mission, index) => {
         const p = arenaToScreen(viewport, mission.approach_pose);
+        const label = labels[index];
         const tip = headingTip(p.x, p.y, mission.approach_pose.theta);
         const selected = selection?.kind === "mission" && selection.id === mission.id;
         return (
@@ -225,8 +234,9 @@ export function ArenaOverlay({ scenario, viewport, selection, onSelect }: Layers
               strokeWidth={2}
             />
             <text
-              x={p.x + 10}
-              y={p.y - 10}
+              x={label?.x ?? p.x + 10}
+              y={label?.y ?? p.y - 10}
+              textAnchor={label?.anchor ?? "start"}
               className="fill-text text-[12px] font-medium"
               paintOrder="stroke"
               stroke="var(--color-bg)"

@@ -27,7 +27,7 @@ describe("Shell", () => {
     const labels = within(nav)
       .getAllByRole("link")
       .map((link) => link.textContent);
-    expect(labels).toEqual(["Overview", "Arena"]);
+    expect(labels).toEqual(["Overview", "Arena", "Strategy"]);
   });
 
   it("marks the current page", () => {
