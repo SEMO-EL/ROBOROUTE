@@ -36,3 +36,13 @@ def test_non_json_file_raises_load_error(tmp_path: Path) -> None:
     bad.write_text("{not json", encoding="utf-8")
     with pytest.raises(ScenarioLoadError):
         load_scenario(bad)
+
+
+@pytest.mark.parametrize("path", sorted(SCENARIOS_DIR.glob("*.json")), ids=lambda p: p.name)
+def test_example_files_are_canonical(path: Path) -> None:
+    """Files store exactly what the API serves, so the frontend can use them as fixtures.
+
+    Regenerate with: uv run python scripts/canonicalize_scenarios.py
+    """
+    scenario = load_scenario(path)
+    assert json.loads(path.read_text(encoding="utf-8")) == scenario.model_dump(mode="json")

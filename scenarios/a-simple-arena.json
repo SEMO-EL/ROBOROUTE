@@ -13,35 +13,72 @@
         "id": "ridge",
         "label": "Ridge",
         "kind": "solid",
-        "shape": { "kind": "rect", "cx": 0.8, "cy": 0.45, "width": 0.08, "height": 0.7, "rotation": 0.0 }
+        "shape": {
+          "kind": "rect",
+          "cx": 0.8,
+          "cy": 0.45,
+          "width": 0.08,
+          "height": 0.7,
+          "rotation": 0.0
+        }
       },
       {
         "id": "tower",
         "label": "Tower",
         "kind": "solid",
-        "shape": { "kind": "circle", "cx": 1.35, "cy": 0.75, "radius": 0.12 }
+        "shape": {
+          "kind": "circle",
+          "cx": 1.35,
+          "cy": 0.75,
+          "radius": 0.12
+        }
       },
       {
         "id": "crate",
         "label": "Crate",
         "kind": "solid",
-        "shape": { "kind": "rect", "cx": 1.6, "cy": 0.3, "width": 0.25, "height": 0.18, "rotation": 0.3 }
+        "shape": {
+          "kind": "rect",
+          "cx": 1.6,
+          "cy": 0.3,
+          "width": 0.25,
+          "height": 0.18,
+          "rotation": 0.3
+        }
       },
       {
         "id": "pond",
         "label": "Pond (keep out)",
         "kind": "no_go",
-        "shape": { "kind": "rect", "cx": 0.45, "cy": 0.95, "width": 0.4, "height": 0.2, "rotation": 0.0 }
+        "shape": {
+          "kind": "rect",
+          "cx": 0.45,
+          "cy": 0.95,
+          "width": 0.4,
+          "height": 0.2,
+          "rotation": 0.0
+        }
       }
     ],
     "home_zones": [
       {
         "id": "home",
         "label": "Home",
-        "shape": { "kind": "rect", "cx": 0.2, "cy": 0.2, "width": 0.36, "height": 0.36, "rotation": 0.0 }
+        "shape": {
+          "kind": "rect",
+          "cx": 0.2,
+          "cy": 0.2,
+          "width": 0.36,
+          "height": 0.36,
+          "rotation": 0.0
+        }
       }
     ],
-    "start_pose": { "x": 0.2, "y": 0.2, "theta": 0.0 }
+    "start_pose": {
+      "x": 0.2,
+      "y": 0.2,
+      "theta": 0.0
+    }
   },
   "robot": {
     "name": "Demo driving base",
@@ -49,33 +86,85 @@
     "length": 0.2,
     "width": 0.16,
     "safety_margin": 0.01,
-    "linear": { "max_speed": 0.25, "acceleration": 0.5, "provenance": "entered" },
-    "angular": { "max_speed": 2.5, "acceleration": 6.0, "provenance": "entered" }
+    "linear": {
+      "max_speed": 0.25,
+      "acceleration": 0.5,
+      "provenance": "entered"
+    },
+    "angular": {
+      "max_speed": 2.5,
+      "acceleration": 6.0,
+      "provenance": "entered"
+    }
   },
   "missions": [
     {
       "id": "beacon",
       "name": "Light the beacon",
       "description": "Push the lever beside the ridge.",
-      "approach_pose": { "x": 0.55, "y": 0.55, "theta": 1.5707963267948966 },
-      "execution_time": { "kind": "fixed", "value": 4.0 },
-      "success": { "kind": "probability", "p": 0.95 }
+      "approach_pose": {
+        "x": 0.55,
+        "y": 0.55,
+        "theta": 1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "fixed",
+        "value": 4.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.95
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
     },
     {
       "id": "bridge",
       "name": "Lower the bridge",
       "description": "Drive onto the ramp and release the latch.",
-      "approach_pose": { "x": 1.1, "y": 1.0, "theta": 0.0 },
-      "execution_time": { "kind": "triangular", "low": 6.0, "mode": 8.0, "high": 12.0 },
-      "success": { "kind": "probability", "p": 0.8 }
+      "approach_pose": {
+        "x": 1.1,
+        "y": 1.0,
+        "theta": 0.0
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 6.0,
+        "mode": 8.0,
+        "high": 12.0
+      },
+      "success": {
+        "kind": "probability",
+        "p": 0.8
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
     },
     {
       "id": "crane",
       "name": "Lift the crane hook",
       "description": "Raise the hook with an attachment arm.",
-      "approach_pose": { "x": 1.75, "y": 0.75, "theta": -1.5707963267948966 },
-      "execution_time": { "kind": "triangular", "low": 8.0, "mode": 10.0, "high": 15.0 },
-      "success": { "kind": "counts", "successes": 7, "attempts": 10 }
+      "approach_pose": {
+        "x": 1.75,
+        "y": 0.75,
+        "theta": -1.5707963267948966
+      },
+      "execution_time": {
+        "kind": "triangular",
+        "low": 8.0,
+        "mode": 10.0,
+        "high": 15.0
+      },
+      "success": {
+        "kind": "counts",
+        "successes": 7,
+        "attempts": 10
+      },
+      "max_attempts": 1,
+      "retry_time": null,
+      "attachment": null
     }
   ],
   "constraints": [],
@@ -83,10 +172,27 @@
     "id": "a-simple-rules",
     "name": "Scenario A rules (fictional)",
     "rules": [
-      { "kind": "mission_points", "mission": "beacon", "points": 20 },
-      { "kind": "mission_points", "mission": "bridge", "points": 35 },
-      { "kind": "mission_points", "mission": "crane", "points": 40 }
+      {
+        "kind": "mission_points",
+        "mission": "beacon",
+        "points": 20.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "bridge",
+        "points": 35.0
+      },
+      {
+        "kind": "mission_points",
+        "mission": "crane",
+        "points": 40.0
+      }
     ]
   },
-  "format": { "kind": "single_run", "time_budget": 120.0, "must_end_in_home": false }
+  "format": {
+    "kind": "single_run",
+    "time_budget": 120.0,
+    "reset_time": 0.0,
+    "must_end_in_home": false
+  }
 }

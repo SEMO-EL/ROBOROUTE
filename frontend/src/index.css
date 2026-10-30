@@ -58,6 +58,11 @@
     outline-offset: 2px;
   }
 
+  /* Pointer focus on interactive SVG shapes is shown by the selection style instead. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
