@@ -1,0 +1,23 @@
+scenario,speed_factor,optimal_score,greedy_score,missions,selected,completion_s,travel_s
+b-medium,0.5,115.833333,106.833333,5,crane drill lift satellite solar,88.988,34.988
+b-medium,0.6,124.333333,124.333333,6,crane drill relay satellite solar valve,88.565,32.899
+b-medium,0.7,124.333333,124.333333,6,crane drill relay satellite solar valve,85.497,29.83
+b-medium,0.8,134.833333,124.333333,6,crane drill lift satellite solar valve,89.982,29.982
+b-medium,0.9,134.833333,134.833333,6,crane drill lift satellite solar valve,88.338,28.338
+b-medium,1.0,134.833333,134.833333,6,crane drill lift satellite solar valve,87.124,27.124
+b-medium,1.1,134.833333,134.833333,6,crane drill lift satellite solar valve,86.217,26.217
+b-medium,1.2,134.833333,134.833333,6,crane drill lift satellite solar valve,85.541,25.541
+b-medium,1.3,134.833333,124.333333,6,crane drill lift satellite solar valve,85.041,25.041
+b-medium,1.4,134.833333,124.333333,6,crane drill lift satellite solar valve,84.679,24.679
+b-medium,1.5,134.833333,124.333333,6,crane drill lift satellite solar valve,84.416,24.416
+d-complex,0.5,126.484375,97.4375,6,beacon bridge dock-a gate key ramp,125.276,59.942
+d-complex,0.6,126.484375,97.4375,6,beacon bridge dock-a gate key ramp,117.888,52.555
+d-complex,0.7,126.484375,97.4375,6,beacon bridge dock-a gate key ramp,112.806,47.473
+d-complex,0.8,142.984375,117.4375,7,beacon bridge dock-b gate key ramp tree,149.405,67.738
+d-complex,0.9,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,148.908,65.575
+d-complex,1.0,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,145.997,62.663
+d-complex,1.1,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,143.814,60.481
+d-complex,1.2,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,142.176,58.843
+d-complex,1.3,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,140.95,57.617
+d-complex,1.4,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,140.031,56.698
+d-complex,1.5,146.484375,117.4375,7,beacon bridge dock-a gate key ramp tree,139.328,55.995
