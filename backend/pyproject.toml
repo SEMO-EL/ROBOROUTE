@@ -21,6 +21,7 @@ dev = [
     "httpx2>=2.16",
     "networkx>=3.7",
     "shapely>=2.2",
+    "scipy-stubs>=1.18.1.1",
 ]
 
 [build-system]
