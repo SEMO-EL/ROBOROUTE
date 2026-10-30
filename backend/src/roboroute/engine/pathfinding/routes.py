@@ -112,45 +112,33 @@ class RoutePlanner:
                 return cell
         return None
 
-    def plan(
-        self, start: Point, goal: Point, options: RouteOptions, tracer: Tracer | None = None
-    ) -> RouteResult:
-        for label, point in (("start", start), ("goal", goal)):
+    def _check_positions(self, positions: list[tuple[str, Point]]) -> RouteResult | None:
+        for label, point in positions:
             if self.field.at(point) < self.radius - EPS:
                 return _failure(
                     RouteStatus.POSE_IN_COLLISION,
                     f"The {label} position {format_point_cm(point)} is too close to an obstacle "
                     f"or wall for a robot of collision radius {self.radius * 100:.1f} cm.",
                 )
-        if start == goal:
-            return RouteResult(RouteStatus.OK, "", [start], [start], 0.0, 0.0, None)
+        return None
 
-        start_cell, goal_cell = self.snap(start), self.snap(goal)
-        if start_cell is None or goal_cell is None:
-            stuck = start if start_cell is None else goal
-            return _failure(
-                RouteStatus.SNAP_FAILED,
-                f"The position {format_point_cm(stuck)} is collision-free, but no planning-grid "
-                f"cell within {SNAP_RING} cells can be reached in a straight line. "
-                "Try a finer grid resolution.",
-            )
+    @staticmethod
+    def _snap_failure(point: Point) -> RouteResult:
+        return _failure(
+            RouteStatus.SNAP_FAILED,
+            f"The position {format_point_cm(point)} is collision-free, but no planning-grid "
+            f"cell within {SNAP_RING} cells can be reached in a straight line. "
+            "Try a finer grid resolution.",
+        )
 
-        if options.algorithm == "astar":
-            result = astar(
-                self.grid, start_cell, goal_cell, options.heuristic, options.connectivity, tracer
-            )
-            cells, stats = (
-                result.path,
-                SearchStats(
-                    result.algorithm, result.expanded, result.cost, result.optimality_guaranteed
-                ),
-            )
-        else:
-            tree = dijkstra(self.grid, start_cell, [goal_cell], options.connectivity, tracer)
-            cells = tree.path_to(goal_cell)
-            cost = tree.dist.get(goal_cell, math.inf)
-            stats = SearchStats(f"dijkstra[{options.connectivity}]", tree.expanded, cost, True)
-
+    def _finish(
+        self,
+        start: Point,
+        goal: Point,
+        cells: list[Cell] | None,
+        stats: SearchStats,
+        smooth: bool,
+    ) -> RouteResult:
         if cells is None:
             return RouteResult(
                 RouteStatus.UNREACHABLE,
@@ -162,9 +150,8 @@ class RoutePlanner:
                 math.inf,
                 stats,
             )
-
         raw = compress_collinear([start, *(self.grid.center_of(c) for c in cells), goal])
-        smoothed = shortcut(raw, self.is_free) if options.smooth else raw
+        smoothed = shortcut(raw, self.is_free) if smooth else raw
         return RouteResult(
             RouteStatus.OK,
             "",
@@ -174,3 +161,81 @@ class RoutePlanner:
             polyline_length(smoothed),
             stats,
         )
+
+    def plan(
+        self, start: Point, goal: Point, options: RouteOptions, tracer: Tracer | None = None
+    ) -> RouteResult:
+        failure = self._check_positions([("start", start), ("goal", goal)])
+        if failure is not None:
+            return failure
+        if start == goal:
+            return RouteResult(RouteStatus.OK, "", [start], [start], 0.0, 0.0, None)
+
+        start_cell, goal_cell = self.snap(start), self.snap(goal)
+        if start_cell is None:
+            return self._snap_failure(start)
+        if goal_cell is None:
+            return self._snap_failure(goal)
+
+        if options.algorithm == "astar":
+            result = astar(
+                self.grid, start_cell, goal_cell, options.heuristic, options.connectivity, tracer
+            )
+            stats = SearchStats(
+                result.algorithm, result.expanded, result.cost, result.optimality_guaranteed
+            )
+            return self._finish(start, goal, result.path, stats, options.smooth)
+
+        tree = dijkstra(self.grid, start_cell, [goal_cell], options.connectivity, tracer)
+        stats = SearchStats(
+            f"dijkstra[{options.connectivity}]",
+            tree.expanded,
+            tree.dist.get(goal_cell, math.inf),
+            True,
+        )
+        return self._finish(start, goal, tree.path_to(goal_cell), stats, options.smooth)
+
+    def plan_from(
+        self, start: Point, goals: list[Point], connectivity: int = 8, smooth: bool = True
+    ) -> list[RouteResult]:
+        """Routes from one start to many goals with a single Dijkstra search.
+
+        Produces the same routes as ``plan(..., RouteOptions(algorithm="dijkstra"))`` for each
+        goal: with deterministic tie-breaking, stopping later does not change the parent of any
+        cell that was already settled.
+        """
+        failure = self._check_positions([("start", start)])
+        if failure is not None:
+            return [failure for _ in goals]
+        start_cell = self.snap(start)
+        if start_cell is None:
+            return [self._snap_failure(start) for _ in goals]
+
+        goal_cells: list[Cell | None] = []
+        results: list[RouteResult | None] = []
+        for goal in goals:
+            problem = self._check_positions([("goal", goal)])
+            cell = None if problem is not None else self.snap(goal)
+            if problem is None and cell is None:
+                problem = self._snap_failure(goal)
+            if problem is None and goal == start:
+                problem = RouteResult(RouteStatus.OK, "", [start], [start], 0.0, 0.0, None)
+            goal_cells.append(cell)
+            results.append(problem)
+
+        tree = dijkstra(
+            self.grid,
+            start_cell,
+            [c for c, r in zip(goal_cells, results, strict=True) if c is not None and r is None],
+            connectivity,
+        )
+        finished: list[RouteResult] = []
+        for goal, cell, result in zip(goals, goal_cells, results, strict=True):
+            if result is not None or cell is None:
+                finished.append(result if result is not None else self._snap_failure(goal))
+                continue
+            stats = SearchStats(
+                f"dijkstra[{connectivity}]", tree.expanded, tree.dist.get(cell, math.inf), True
+            )
+            finished.append(self._finish(start, goal, tree.path_to(cell), stats, smooth))
+        return finished

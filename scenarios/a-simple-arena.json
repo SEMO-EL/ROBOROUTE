@@ -16,9 +16,9 @@
         "shape": {
           "kind": "rect",
           "cx": 0.8,
-          "cy": 0.45,
+          "cy": 0.4,
           "width": 0.08,
-          "height": 0.7,
+          "height": 0.6,
           "rotation": 0.0
         }
       },
@@ -52,10 +52,10 @@
         "kind": "no_go",
         "shape": {
           "kind": "rect",
-          "cx": 0.45,
-          "cy": 0.95,
-          "width": 0.4,
-          "height": 0.2,
+          "cx": 0.3,
+          "cy": 1.025,
+          "width": 0.3,
+          "height": 0.15,
           "rotation": 0.0
         }
       }
@@ -195,5 +195,6 @@
     "time_budget": 120.0,
     "reset_time": 0.0,
     "must_end_in_home": false
-  }
+  },
+  "travel_overrides": []
 }

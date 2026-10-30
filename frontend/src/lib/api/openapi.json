@@ -1006,6 +1006,14 @@
           },
           "scoring": {
             "$ref": "#/components/schemas/ScoringProfile"
+          },
+          "travel_overrides": {
+            "items": {
+              "$ref": "#/components/schemas/TravelOverride"
+            },
+            "maxItems": 1000,
+            "title": "Travel Overrides",
+            "type": "array"
           }
         },
         "required": [
@@ -1019,7 +1027,8 @@
           "missions",
           "constraints",
           "scoring",
-          "format"
+          "format",
+          "travel_overrides"
         ],
         "title": "Scenario",
         "type": "object"
@@ -1071,6 +1080,35 @@
           "rules"
         ],
         "title": "ScoringProfile",
+        "type": "object"
+      },
+      "TravelOverride": {
+        "additionalProperties": false,
+        "description": "A stopwatch time for driving from one node to another, used instead of the model.",
+        "properties": {
+          "from_node": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "From Node",
+            "type": "string"
+          },
+          "seconds": {
+            "maximum": 600.0,
+            "minimum": 0.0,
+            "title": "Seconds",
+            "type": "number"
+          },
+          "to_node": {
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "To Node",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_node",
+          "to_node",
+          "seconds"
+        ],
+        "title": "TravelOverride",
         "type": "object"
       },
       "Triangular": {

@@ -32,11 +32,13 @@ from roboroute.engine.models.scoring import (
     ScoringProfile,
     ScoringRule,
 )
+from roboroute.engine.models.travel import START_NODE, TravelOverride
 
 __all__ = [
     "MAX_GRID_CELLS",
     "MAX_MISSIONS",
     "SCHEMA_VERSION",
+    "START_NODE",
     "AllOfBonus",
     "Arena",
     "CircleShape",
@@ -65,6 +67,7 @@ __all__ = [
     "ScoringRule",
     "Shape",
     "SuccessModel",
+    "TravelOverride",
     "Triangular",
     "Zone",
     "find_reference_issues",

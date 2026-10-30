@@ -46,3 +46,13 @@ def test_example_files_are_canonical(path: Path) -> None:
     """
     scenario = load_scenario(path)
     assert json.loads(path.read_text(encoding="utf-8")) == scenario.model_dump(mode="json")
+
+
+@pytest.mark.parametrize("path", sorted(SCENARIOS_DIR.glob("*.json")), ids=lambda p: p.name)
+def test_example_missions_reachable_from_start(path: Path) -> None:
+    """Demo scenarios must be solvable: every mission can be reached from the start pose."""
+    from roboroute.engine.travel.matrix import START, build_travel_matrix
+
+    matrix = build_travel_matrix(load_scenario(path))
+    unreachable = [f"{a}->{b}: {f.message}" for (a, b), f in matrix.failures.items() if a == START]
+    assert unreachable == []

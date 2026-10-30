@@ -563,6 +563,8 @@ export interface components {
        */
       schema_version: 1;
       scoring: components["schemas"]["ScoringProfile"];
+      /** Travel Overrides */
+      travel_overrides: components["schemas"]["TravelOverride"][];
     };
     /** ScoringProfile */
     ScoringProfile: {
@@ -576,6 +578,18 @@ export interface components {
         | components["schemas"]["AllOfBonus"]
         | components["schemas"]["FailurePenalty"]
       )[];
+    };
+    /**
+     * TravelOverride
+     * @description A stopwatch time for driving from one node to another, used instead of the model.
+     */
+    TravelOverride: {
+      /** From Node */
+      from_node: string;
+      /** Seconds */
+      seconds: number;
+      /** To Node */
+      to_node: string;
     };
     /**
      * Triangular

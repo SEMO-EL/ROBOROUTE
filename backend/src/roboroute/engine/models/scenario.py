@@ -19,6 +19,7 @@ from roboroute.engine.models.issues import Issue
 from roboroute.engine.models.missions import Mission
 from roboroute.engine.models.robot import Robot
 from roboroute.engine.models.scoring import AllOfBonus, ScoringProfile
+from roboroute.engine.models.travel import START_NODE, TravelOverride
 
 SCHEMA_VERSION: Literal[1] = 1
 MAX_MISSIONS = 32
@@ -38,6 +39,7 @@ class Scenario(StrictModel):
     constraints: list[Constraint] = Field(default_factory=list, max_length=200)
     scoring: ScoringProfile
     format: CompetitionFormat
+    travel_overrides: list[TravelOverride] = Field(default_factory=list, max_length=1000)
 
     @model_validator(mode="after")
     def _check_references(self) -> Self:
@@ -82,6 +84,14 @@ def find_reference_issues(scenario: Scenario) -> list[Issue]:
             )
 
     mission_ids = {m.id for m in scenario.missions}
+    if START_NODE in mission_ids:
+        issues.append(
+            Issue(
+                code="reserved_id",
+                message=f"'{START_NODE}' is reserved for the start pose; rename that mission",
+                path=["missions"],
+            )
+        )
 
     def check(mission_id: str, path: list[str | int], owner: str) -> None:
         if mission_id not in mission_ids:
@@ -117,6 +127,28 @@ def find_reference_issues(scenario: Scenario) -> list[Issue]:
                 check(mission_id, ["scoring", "rules", index, "missions", position], owner)
         else:
             check(rule.mission, ["scoring", "rules", index, "mission"], owner)
+
+    nodes = mission_ids | {START_NODE}
+    for index, override in enumerate(scenario.travel_overrides):
+        for field in ("from_node", "to_node"):
+            node = getattr(override, field)
+            if node not in nodes:
+                issues.append(
+                    Issue(
+                        code="unknown_node",
+                        message=f"travel override #{index + 1} refers to unknown node '{node}'",
+                        path=["travel_overrides", index, field],
+                    )
+                )
+        if override.from_node == override.to_node:
+            issues.append(
+                Issue(
+                    code="self_constraint",
+                    message=f"travel override #{index + 1} starts and ends at "
+                    f"'{override.from_node}'",
+                    path=["travel_overrides", index],
+                )
+            )
 
     for index, mission in enumerate(scenario.missions):
         pose = mission.approach_pose
