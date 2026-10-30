@@ -1,6 +1,7 @@
 import { Outlet } from "react-router";
 
 import { Sidebar } from "./Sidebar";
+import { StatusBar } from "./StatusBar";
 
 /** Application frame: navigation on the left, the routed page fills the workspace. */
 export function Shell() {
@@ -11,6 +12,7 @@ export function Shell() {
         <main className="min-h-0 flex-1 overflow-auto">
           <Outlet />
         </main>
+        <StatusBar />
       </div>
     </div>
   );

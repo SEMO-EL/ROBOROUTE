@@ -17,6 +17,9 @@ class StrictModel(BaseModel):
         frozen=True,
         allow_inf_nan=False,
         str_strip_whitespace=True,
+        # Responses always contain defaulted fields, so the generated client types mark them
+        # as required instead of optional.
+        json_schema_serialization_defaults_required=True,
     )
 
 
