@@ -39,6 +39,15 @@ class OccupancyGrid:
     inflation: float  # the clearance threshold R + h√2/2 used to build the grid
     _free_rows: list[list[bool]] = field(repr=False, compare=False)
 
+    @classmethod
+    def from_mask(
+        cls, free: NDArray[np.bool_], resolution: float, inflation: float = 0.0
+    ) -> "OccupancyGrid":
+        """Wrap an explicit free/blocked mask (rows × columns); used by tests and benchmarks."""
+        mask = np.asarray(free, dtype=bool)
+        rows, columns = mask.shape
+        return cls(resolution, columns, rows, mask, inflation, mask.tolist())
+
     def in_bounds(self, cell: Cell) -> bool:
         i, j = cell
         return 0 <= i < self.columns and 0 <= j < self.rows
