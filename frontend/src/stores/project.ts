@@ -8,14 +8,18 @@ const HISTORY_LIMIT = 100;
 
 export interface ProjectState {
   scenario: Scenario | null;
+  /** Identity of the saved project the scenario belongs to (local storage key). */
+  projectId: string | null;
+  /** Set when the browser refused to save; work is kept in memory until it succeeds again. */
+  storageError: string | null;
   status: "idle" | "loading" | "ready" | "error";
   error: string | null;
   /** Earlier versions (oldest first) for undo, and undone versions for redo. */
   past: Scenario[];
   future: Scenario[];
   loadExample: (id: string, client?: ApiClient) => Promise<void>;
-  /** Replace the scenario and start a fresh history (loading or creating a project). */
-  replace: (scenario: Scenario) => void;
+  /** Replace the scenario and start a fresh history; without an id a new project is created. */
+  replace: (scenario: Scenario, projectId?: string) => void;
   /** A user edit: becomes one undo step. */
   edit: (next: Scenario) => void;
   /** Show an intermediate state (e.g. while dragging) without recording history. */
@@ -24,6 +28,10 @@ export interface ProjectState {
   commit: (before: Scenario) => void;
   undo: () => void;
   redo: () => void;
+}
+
+export function newProjectId(): string {
+  return globalThis.crypto.randomUUID();
 }
 
 function bounded(history: Scenario[]): Scenario[] {
@@ -36,6 +44,8 @@ function bounded(history: Scenario[]): Scenario[] {
  */
 export const useProjectStore = create<ProjectState>()((set, get) => ({
   scenario: null,
+  projectId: null,
+  storageError: null,
   status: "idle",
   error: null,
   past: [],
@@ -51,8 +61,15 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
       set({ status: "error", error: error instanceof Error ? error.message : String(error) });
     }
   },
-  replace: (scenario) => {
-    set({ scenario, status: "ready", error: null, past: [], future: [] });
+  replace: (scenario, projectId) => {
+    set({
+      scenario,
+      projectId: projectId ?? newProjectId(),
+      status: "ready",
+      error: null,
+      past: [],
+      future: [],
+    });
   },
   edit: (next) => {
     const { scenario, past } = get();

@@ -41,3 +41,13 @@ describe("Shell", () => {
     expect(within(screen.getByRole("main")).getByText("arena body")).toBeInTheDocument();
   });
 });
+
+describe("save status", () => {
+  it("warns when the browser refuses to save", async () => {
+    const { useProjectStore } = await import("@/stores/project");
+    useProjectStore.setState({ storageError: "Could not save in this browser (quota)." });
+    renderShell();
+    expect(screen.getByRole("alert")).toHaveTextContent("Could not save in this browser");
+    useProjectStore.setState({ storageError: null });
+  });
+});
