@@ -49,7 +49,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         rate_limit_per_minute=settings.rate_limit_per_minute,
         max_concurrent=settings.max_concurrent_jobs,
     )
-    app.add_middleware(SecurityHeadersMiddleware, csp_exempt=(f"{API_PREFIX}/docs",))
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        csp_exempt=(f"{API_PREFIX}/docs",),
+        frame_ancestors=settings.frame_ancestors,
+    )
 
     for module in (meta, examples, scenarios, routing, calibration, optimize, simulate):
         app.include_router(module.router, prefix=API_PREFIX)
