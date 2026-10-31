@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 
 import { ArenaPage } from "@/features/arena/ArenaPage";
+import { MissionsPage } from "@/features/missions/MissionsPage";
 import { OverviewPage } from "@/features/overview/OverviewPage";
 import { SimulationPage } from "@/features/simulation/SimulationPage";
 import { StrategyPage } from "@/features/strategy/StrategyPage";
@@ -14,6 +15,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <OverviewPage /> },
       { path: "arena", element: <ArenaPage /> },
+      { path: "missions", element: <MissionsPage /> },
       { path: "strategy", element: <StrategyPage /> },
       { path: "simulation", element: <SimulationPage /> },
     ],

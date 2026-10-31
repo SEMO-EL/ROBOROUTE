@@ -1,4 +1,11 @@
-import { ChartNoAxesColumn, LayoutDashboard, Map, Route, type LucideIcon } from "lucide-react";
+import {
+  ChartNoAxesColumn,
+  Flag,
+  LayoutDashboard,
+  Map,
+  Route,
+  type LucideIcon,
+} from "lucide-react";
 
 export interface NavItem {
   to: string;
@@ -14,6 +21,12 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { to: "/", label: "Overview", icon: LayoutDashboard, description: "Project summary" },
   { to: "/arena", label: "Arena", icon: Map, description: "Field, obstacles and missions" },
+  {
+    to: "/missions",
+    label: "Missions",
+    icon: Flag,
+    description: "Points, durations, reliability, constraints",
+  },
   { to: "/strategy", label: "Strategy", icon: Route, description: "Optimal mission plan" },
   {
     to: "/simulation",

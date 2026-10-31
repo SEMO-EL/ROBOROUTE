@@ -119,11 +119,13 @@ export function TextField({
   label,
   value,
   maxLength = 120,
+  allowEmpty = false,
   onCommit,
 }: {
   label: string;
   value: string;
   maxLength?: number;
+  allowEmpty?: boolean;
   onCommit: (value: string) => void;
 }) {
   const id = useId();
@@ -135,7 +137,7 @@ export function TextField({
   }
   const commit = () => {
     const text = draft.trim();
-    if (text && text !== value) onCommit(text.slice(0, maxLength));
+    if ((text || allowEmpty) && text !== value) onCommit(text.slice(0, maxLength));
     else setDraft(value);
   };
   return (
