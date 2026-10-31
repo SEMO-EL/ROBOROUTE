@@ -45,5 +45,13 @@ def test_rect_signed_distance_matches_shapely(rect: RectShape, p: tuple[float, f
 def test_segment_rect_distance_matches_shapely(
     rect: RectShape, a: tuple[float, float], b: tuple[float, float]
 ) -> None:
-    expected = shapely_rect(rect).distance(LineString([a, b]) if a != b else Point(a))
+    # GEOS returns inf for a segment whose length is subnormal (e.g. (0, 1)–(5e-324, 1), found by
+    # Hypothesis); such a segment is a point for every practical purpose.
+    degenerate = math.dist(a, b) < 1e-12
+    expected = shapely_rect(rect).distance(Point(a) if degenerate else LineString([a, b]))
     assert math.isclose(segment_distance(a, b, rect), expected, abs_tol=1e-9)
+
+
+def test_subnormal_segment_is_measured_like_a_point() -> None:
+    rect = RectShape(cx=0.0, cy=0.0, width=1.0, height=1.0, rotation=0.0)
+    assert segment_distance((0.0, 1.0), (5e-324, 1.0), rect) == 0.5
