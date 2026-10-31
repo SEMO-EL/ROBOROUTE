@@ -70,3 +70,30 @@ export const MOTORS: readonly MotorReference[] = [
 export function speedCeiling(rpm: number, wheelDiameter: number): number {
   return (rpm / 60) * Math.PI * wheelDiameter;
 }
+
+/**
+ * A stopwatch time for one trip (from → to), used instead of the modelled travel time. Times are
+ * directional: the way back can differ. Setting a trip that already has a time replaces it.
+ */
+export function setTripTime(
+  scenario: Scenario,
+  from: string,
+  to: string,
+  seconds: number,
+): Scenario {
+  if (from === to) return scenario;
+  const others = scenario.travel_overrides.filter(
+    (o) => !(o.from_node === from && o.to_node === to),
+  );
+  return {
+    ...scenario,
+    travel_overrides: [...others, { from_node: from, to_node: to, seconds }],
+  };
+}
+
+export function removeTripTime(scenario: Scenario, index: number): Scenario {
+  return {
+    ...scenario,
+    travel_overrides: scenario.travel_overrides.filter((_, i) => i !== index),
+  };
+}

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 
@@ -100,5 +100,45 @@ describe("RobotPage", () => {
     await userEvent.type(screen.getByLabelText("Distance 1 (cm)"), "20");
     await userEvent.click(screen.getByRole("button", { name: "Fit driving speed" }));
     expect(screen.getByRole("alert")).toHaveTextContent(/row 1/i);
+  });
+});
+
+describe("RobotPage trip times", () => {
+  it("records a measured trip time that replaces the modelled one", async () => {
+    const user = userEvent.setup();
+    useProjectStore.setState({ scenario: SCENARIO_A, status: "ready" });
+    render(
+      <MemoryRouter>
+        <RobotPage client={client(TWO_POINT_FIT)} />
+      </MemoryRouter>,
+    );
+    const form = screen.getByRole("form", { name: "Add a measured trip" });
+    await user.selectOptions(within(form).getByLabelText("From"), "start");
+    await user.selectOptions(within(form).getByLabelText("To"), "bridge");
+    await user.type(within(form).getByLabelText("Seconds"), "6.5");
+    await user.click(within(form).getByRole("button", { name: "Add" }));
+    expect(useProjectStore.getState().scenario?.travel_overrides).toEqual([
+      { from_node: "start", to_node: "bridge", seconds: 6.5 },
+    ]);
+    const list = screen.getByRole("list", { name: "Measured trips" });
+    expect(list).toHaveTextContent("Start → Lower the bridge");
+    expect(list).toHaveTextContent("6.5 s");
+    await user.click(within(list).getByRole("button", { name: /Remove/ }));
+    expect(useProjectStore.getState().scenario?.travel_overrides).toEqual([]);
+  });
+
+  it("refuses a time that is not a positive number", async () => {
+    const user = userEvent.setup();
+    useProjectStore.setState({ scenario: SCENARIO_A, status: "ready" });
+    render(
+      <MemoryRouter>
+        <RobotPage client={client(TWO_POINT_FIT)} />
+      </MemoryRouter>,
+    );
+    const form = screen.getByRole("form", { name: "Add a measured trip" });
+    await user.type(within(form).getByLabelText("Seconds"), "-3");
+    await user.click(within(form).getByRole("button", { name: "Add" }));
+    expect(within(form).getByRole("alert")).toHaveTextContent(/positive/);
+    expect(useProjectStore.getState().scenario?.travel_overrides).toEqual([]);
   });
 });

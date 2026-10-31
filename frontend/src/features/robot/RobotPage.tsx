@@ -8,6 +8,7 @@ import { useProjectStore } from "@/stores/project";
 
 import { CalibrationWizard } from "./CalibrationWizard";
 import { applyCalibration, MOTORS, speedCeiling, updateProfile, updateRobot } from "./robot";
+import { TripTimes } from "./TripTimes";
 
 type ApiClient = typeof api;
 type Profile = Scenario["robot"]["linear"];
@@ -295,6 +296,10 @@ export function RobotPage({ client = api }: { client?: ApiClient }) {
             if (current) edit(applyCalibration(current, tab, fit));
           }}
         />
+      </Card>
+
+      <Card title="Measured trip times">
+        <TripTimes scenario={scenario} />
       </Card>
 
       <Ceiling speed={robot.linear.max_speed} />

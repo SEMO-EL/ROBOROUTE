@@ -18,7 +18,9 @@ function describe(step: TimelineStep, names: Record<string, string>): string {
   const name = (id: string) => names[id] ?? id;
   const time = formatSeconds(Number(step.seconds.toFixed(1)));
   if (step.kind === "travel")
-    return `Travel ${name(step.from_node)} → ${name(step.to_node)}: ${time}`;
+    return `Travel ${name(step.from_node)} → ${name(step.to_node)}: ${time}${
+      step.provenance === "measured" ? " (measured)" : ""
+    }`;
   if (step.kind === "reset") return `Back in home, attachment change: ${time}`;
   return `${name(step.to_node)}: ${time}`;
 }

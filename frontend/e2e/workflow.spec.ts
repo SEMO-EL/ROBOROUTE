@@ -57,7 +57,7 @@ test("a student builds a field, plans, simulates, saves and explains a strategy"
   await missions.nth(1).click();
   await setNumber(page, "Points (pts)", "25");
 
-  // 4. Robot calibration from two stopwatch measurements.
+  // 4. Robot calibration from two stopwatch measurements...
   await go(page, "Robot");
   await page.getByLabel("Distance 1 (cm)").fill("50");
   await page.getByLabel("Time 1 (s)").fill("2.2");
@@ -70,10 +70,24 @@ test("a student builds a field, plans, simulates, saves and explains a strategy"
   await expect(page.getByText("Top speed", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Apply to robot" }).first().click();
 
-  // 5. The optimal plan.
+  // ...and stopwatch times for the trips from the start, which replace the modelled ones.
+  const trip = page.getByRole("form", { name: "Add a measured trip" });
+  for (const mission of ["Mission 1", "Mission 2"]) {
+    await trip.getByLabel("To").selectOption({ label: mission });
+    await trip.getByLabel("Seconds").fill("6.5");
+    await trip.getByRole("button", { name: "Add" }).click();
+  }
+  await expect(
+    page.getByRole("list", { name: "Measured trips" }).getByRole("listitem"),
+  ).toHaveCount(2);
+
+  // 5. The optimal plan; its first trip uses the measured time.
   await go(page, "Strategy");
   await page.getByRole("button", { name: "Optimise" }).click();
   await expect(page.getByText("Why this plan")).toBeVisible({ timeout: 30_000 });
+  await expect(
+    page.getByTitle(/^Travel Start → Mission \d: 6\.5 s \(measured\)$/).first(),
+  ).toBeAttached();
 
   // 6. Monte Carlo simulation of the optimal and greedy plans.
   await go(page, "Simulation");
