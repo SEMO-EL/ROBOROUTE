@@ -153,3 +153,25 @@ def test_octile_on_empty_grid_expands_only_the_path(side: int) -> None:
     result = astar(grid, (2, 3), (side - 3, int(side * 0.6)), Heuristic.OCTILE, 8)
     assert result.path is not None
     assert result.expanded == len(result.path)
+
+
+def test_trace_replay_reproduces_the_search() -> None:
+    """Following the latest parent of each pushed cell from the goal rebuilds A*'s path exactly."""
+    mask = np.ones((15, 20), dtype=bool)
+    mask[3:12, 8] = False  # a wall to make the search non-trivial
+    grid = OccupancyGrid.from_mask(mask, H)
+    tracer = RecordingTracer(max_events=100_000)
+    result = astar(grid, (2, 7), (17, 7), Heuristic.OCTILE, 8, tracer=tracer)
+    assert result.path is not None
+    assert not tracer.truncated
+    assert sum(e.kind == "expand" for e in tracer.events) == result.expanded
+    parent: dict[Cell, Cell | None] = {}
+    for event in tracer.events:
+        if event.kind == "push":
+            parent[event.cell] = event.parent
+    rebuilt = [result.path[-1]]
+    while rebuilt[-1] != result.path[0]:
+        previous = parent[rebuilt[-1]]
+        assert previous is not None
+        rebuilt.append(previous)
+    assert list(reversed(rebuilt)) == result.path
