@@ -1,29 +1,53 @@
 import { createBrowserRouter } from "react-router";
 
-import { ArenaPage } from "@/features/arena/ArenaPage";
-import { ExperimentsPage } from "@/features/experiments/ExperimentsPage";
-import { LearnPage } from "@/features/learn/LearnPage";
-import { MissionsPage } from "@/features/missions/MissionsPage";
 import { OverviewPage } from "@/features/overview/OverviewPage";
-import { RobotPage } from "@/features/robot/RobotPage";
-import { SimulationPage } from "@/features/simulation/SimulationPage";
-import { StrategyPage } from "@/features/strategy/StrategyPage";
 
 import { Shell } from "./Shell";
 
+// Pages other than the overview are loaded on first visit, keeping the initial download small.
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Shell />,
+    hydrateFallbackElement: <p className="p-6 text-muted">Loading…</p>,
     children: [
       { index: true, element: <OverviewPage /> },
-      { path: "arena", element: <ArenaPage /> },
-      { path: "missions", element: <MissionsPage /> },
-      { path: "robot", element: <RobotPage /> },
-      { path: "strategy", element: <StrategyPage /> },
-      { path: "simulation", element: <SimulationPage /> },
-      { path: "experiments", element: <ExperimentsPage /> },
-      { path: "learn", element: <LearnPage /> },
+      {
+        path: "arena",
+        lazy: async () => ({ Component: (await import("@/features/arena/ArenaPage")).ArenaPage }),
+      },
+      {
+        path: "missions",
+        lazy: async () => ({
+          Component: (await import("@/features/missions/MissionsPage")).MissionsPage,
+        }),
+      },
+      {
+        path: "robot",
+        lazy: async () => ({ Component: (await import("@/features/robot/RobotPage")).RobotPage }),
+      },
+      {
+        path: "strategy",
+        lazy: async () => ({
+          Component: (await import("@/features/strategy/StrategyPage")).StrategyPage,
+        }),
+      },
+      {
+        path: "simulation",
+        lazy: async () => ({
+          Component: (await import("@/features/simulation/SimulationPage")).SimulationPage,
+        }),
+      },
+      {
+        path: "experiments",
+        lazy: async () => ({
+          Component: (await import("@/features/experiments/ExperimentsPage")).ExperimentsPage,
+        }),
+      },
+      {
+        path: "learn",
+        lazy: async () => ({ Component: (await import("@/features/learn/LearnPage")).LearnPage }),
+      },
     ],
   },
 ]);
