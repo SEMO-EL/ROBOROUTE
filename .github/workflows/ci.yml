@@ -118,3 +118,6 @@ jobs:
       - run: curl --fail --silent --retry 20 --retry-delay 1 --retry-all-errors http://localhost:8000/api/v1/health
       - run: curl --fail --silent http://localhost:8000/learn | grep -q '<div id="root">'
       - run: test "$(docker exec roboroute id -u)" != "0"
+      # Hosting platforms (Render) set the port through $PORT.
+      - run: docker run -d --name roboroute-port -e PORT=10000 -p 10000:10000 roboroute:ci
+      - run: curl --fail --silent --retry 20 --retry-delay 1 --retry-all-errors http://localhost:10000/api/v1/health
