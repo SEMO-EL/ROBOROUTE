@@ -79,6 +79,29 @@ def quantile_ci(values: FloatArray, q: float, z: float = Z95) -> tuple[float, In
     return estimate, Interval(float(ordered[low]), float(ordered[high]))
 
 
+def running_mean_ci(
+    values: FloatArray, start: int = 10, z: float = Z95
+) -> list[tuple[int, float, float, float]]:
+    """(n, mean, low, high) of the first n values at n = 10, 20, 50, 100, … and at the full count.
+
+    Shows how the Monte Carlo estimate settles as trials are added: the interval narrows like
+    1/√n. Counts below ``start`` are left out (unless that is all there is) because the normal
+    approximation behind the interval is unreliable for a handful of trials.
+    """
+    total = int(values.size)
+    counts: list[int] = []
+    decade = start
+    while decade < total:
+        counts.extend(c for c in (decade, 2 * decade, 5 * decade) if c < total)
+        decade *= 10
+    counts.append(total)
+    points = []
+    for n in counts:
+        mean, interval = mean_ci(values[:n], z)
+        points.append((n, mean, interval.low, interval.high))
+    return points
+
+
 def summarize(values: FloatArray) -> Summary:
     mean, interval = mean_ci(values)
     quantiles = {}

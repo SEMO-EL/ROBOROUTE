@@ -10,6 +10,7 @@ from roboroute.engine.stats.summary import (
     mean_ci,
     proportion,
     quantile_ci,
+    running_mean_ci,
     summarize,
     wilson,
 )
@@ -88,3 +89,18 @@ def test_histogram_bins_follow_the_score_step() -> None:
     widths = {round(b - a, 9) for a, b in itertools.pairwise(edges)}
     assert widths == {5.0}
     assert sum(counts) == values.size
+
+
+def test_running_mean_ends_at_the_overall_mean() -> None:
+    values = np.random.default_rng(4).normal(50, 10, 1000)
+    points = running_mean_ci(values)
+    assert [p[0] for p in points] == [10, 20, 50, 100, 200, 500, 1000]
+    n, mean, low, high = points[-1]
+    expected_mean, interval = mean_ci(values)
+    assert n == 1000
+    assert mean == pytest.approx(expected_mean)
+    assert (low, high) == pytest.approx((interval.low, interval.high))
+
+
+def test_running_mean_with_one_trial_is_finite() -> None:
+    assert running_mean_ci(np.array([7.0])) == [(1, 7.0, 7.0, 7.0)]

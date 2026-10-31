@@ -2,11 +2,13 @@
 
 from typing import Literal
 
-from pydantic import BaseModel
+import numpy as np
+from pydantic import BaseModel, Field
 
 from roboroute.api.schemas.routes import PointOut
 from roboroute.engine.models import Issue, Scenario
 from roboroute.engine.models.planning import PlanningSettings
+from roboroute.engine.optimization.dp import DPResult
 from roboroute.engine.optimization.explain import Explanation, SensitivityRow
 from roboroute.engine.optimization.instance import PlanningInstance
 from roboroute.engine.optimization.plan import Plan
@@ -124,6 +126,48 @@ class SensitivityOut(BaseModel):
         )
 
 
+class MissionSetOut(BaseModel):
+    missions: list[str]
+    expected_score: float
+    completion_time: float
+
+
+class DPSummaryOut(BaseModel):
+    """What the exact optimiser examined, for the educational view."""
+
+    missions: int
+    subsets: int = Field(description="2ⁿ subsets of the candidate missions")
+    state_space: int = Field(description="Cells of the C(S, j, a) table")
+    states_reached: int = Field(description="Cells reached within the time budget")
+    reachable_subsets: int
+    feasible_subsets: int = Field(description="Subsets that can be completed within the budget")
+    best_sets: list[MissionSetOut] = Field(
+        description="Feasible subsets with the highest expected score (ties: shorter time)"
+    )
+
+    @classmethod
+    def of(cls, result: DPResult, instance: PlanningInstance, limit: int = 10) -> "DPSummaryOut":
+        masks = np.nonzero(result.feasible)[0]
+        order = np.lexsort((result.completion_time[masks], -np.round(result.scores[masks], 9)))
+        best = [
+            MissionSetOut(
+                missions=[instance.ids[i] for i in range(instance.n) if int(mask) >> i & 1],
+                expected_score=float(result.scores[mask]),
+                completion_time=float(result.completion_time[mask]),
+            )
+            for mask in masks[order][:limit]
+        ]
+        return cls(
+            missions=instance.n,
+            subsets=1 << instance.n,
+            state_space=result.state_space,
+            states_reached=result.states_reached,
+            reachable_subsets=result.reachable_subsets,
+            feasible_subsets=int(masks.size),
+            best_sets=best,
+        )
+
+
 class ExcludedOut(BaseModel):
     mission: str
     reason: str
@@ -137,6 +181,7 @@ class OptimizeResponse(BaseModel):
     alternatives: list[PlanOut]
     greedy: PlanOut
     explanation: ExplanationOut | None
+    dp_summary: DPSummaryOut | None
     sensitivity: list[SensitivityOut]
     assumptions: list[str]
     compute_seconds: float

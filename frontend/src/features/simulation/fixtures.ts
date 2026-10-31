@@ -37,6 +37,11 @@ const plan = (label: string, mean: number, analytic: number, cut: number, target
     { mission: "beacon", started: probability(1), succeeded: probability(0.95) },
     { mission: "bridge", started: probability(0.9), succeeded: probability(0.72) },
   ],
+  convergence: [10, 20, 50, 100, 200, 500, 1000].map((trials) => ({
+    trials,
+    mean,
+    interval: interval(mean - 48 / Math.sqrt(trials), mean + 48 / Math.sqrt(trials)),
+  })),
   analytic_expected_score: analytic,
   planned_time: 78.5,
 });

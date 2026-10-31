@@ -86,3 +86,17 @@ def test_total_trials_limited(client: TestClient) -> None:
     response = client.post("/api/v1/simulate", json=body)
     assert response.status_code == 422
     assert response.json()["code"] == "too_many_trials"
+
+
+def test_simulation_returns_convergence(client: TestClient) -> None:
+    scenario = load("a-simple-arena")
+    runs, _ = optimal_runs(client, scenario)
+    body = {
+        "scenario": scenario,
+        "plans": [{"label": "x", "runs": runs}],
+        "config": {"trials": 500, "seed": 2},
+    }
+    plan = client.post("/api/v1/simulate", json=body).json()["plans"][0]
+    points = plan["convergence"]
+    assert [p["trials"] for p in points] == [10, 20, 50, 100, 200, 500]
+    assert points[-1]["mean"] == plan["score"]["mean"]

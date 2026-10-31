@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from roboroute.api.errors import ApiError
 from roboroute.api.routes.routing import check_matrix_work
 from roboroute.api.schemas.optimize import (
+    DPSummaryOut,
     ExcludedOut,
     ExplanationOut,
     OptimizeRequest,
@@ -67,12 +68,14 @@ def optimize(request: OptimizeRequest) -> OptimizeResponse:
         optimal = None
         alternatives: list[PlanOut] = []
         explanation = None
+        dp_summary = None
         sensitivity: list[SensitivityOut] = []
     else:
         result = solve(instance, top_k=request.settings.top_k)
         optimal = PlanOut.of(result.best, instance, matrix)
         alternatives = [PlanOut.of(p, instance, matrix) for p in result.top[1:]]
         explanation = ExplanationOut.of(explain(instance, result))
+        dp_summary = DPSummaryOut.of(result, instance)
         if instance.n <= MAX_SENSITIVITY_MISSIONS:
             sensitivity = [
                 SensitivityOut.of(row)
@@ -99,6 +102,7 @@ def optimize(request: OptimizeRequest) -> OptimizeResponse:
         alternatives=alternatives,
         greedy=greedy_plan,
         explanation=explanation,
+        dp_summary=dp_summary,
         sensitivity=sensitivity,
         assumptions=ASSUMPTIONS,
         compute_seconds=time.perf_counter() - started,

@@ -11,6 +11,7 @@ from roboroute.api.csv_export import to_csv
 from roboroute.api.errors import ApiError
 from roboroute.api.routes.routing import check_matrix_work
 from roboroute.api.schemas.simulate import (
+    ConvergencePointOut,
     DifferenceOut,
     HistogramOut,
     IntervalOut,
@@ -30,7 +31,13 @@ from roboroute.engine.optimization.instance import (
 from roboroute.engine.optimization.plan import evaluate
 from roboroute.engine.simulation.compare import Comparison, SimulatedPlan, compare
 from roboroute.engine.simulation.runner import PlanError
-from roboroute.engine.stats.summary import ecdf, histogram, proportion, summarize
+from roboroute.engine.stats.summary import (
+    ecdf,
+    histogram,
+    proportion,
+    running_mean_ci,
+    summarize,
+)
 from roboroute.engine.travel.matrix import build_travel_matrix
 
 router = APIRouter(tags=["simulate"])
@@ -163,6 +170,10 @@ def simulate_plans(request: SimulateRequest) -> SimulateResponse:
                     succeeded=_probability(trials.succeeded[:, col]),
                 )
                 for col, mission in enumerate(trials.missions)
+            ],
+            convergence=[
+                ConvergencePointOut(trials=n, mean=mean, interval=IntervalOut(low=low, high=high))
+                for n, mean, low, high in running_mean_ci(trials.score)
             ],
             analytic_expected_score=planned.expected_score,
             planned_time=planned.completion_time,

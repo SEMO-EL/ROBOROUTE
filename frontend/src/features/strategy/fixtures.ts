@@ -61,6 +61,19 @@ export const OPTIMIZE_RESULT: OptimizeResult = {
       },
     ],
   },
+  dp_summary: {
+    missions: 3,
+    subsets: 8,
+    state_space: 32,
+    states_reached: 13,
+    reachable_subsets: 8,
+    feasible_subsets: 7,
+    best_sets: [
+      { missions: ["beacon", "bridge"], expected_score: 54.5, completion_time: 47.2 },
+      { missions: ["bridge", "crane"], expected_score: 50, completion_time: 90.4 },
+      { missions: ["bridge"], expected_score: 28, completion_time: 30 },
+    ],
+  },
   sensitivity: [
     {
       factor: 0.8,

@@ -42,6 +42,9 @@ class DPResult:
     completion_time: NDArray[np.float64]  # least completion time per mask (inf if impossible)
     scores: NDArray[np.float64]  # expected score per mask
     feasible: NDArray[np.bool_]
+    state_space: int  # cells in the C(S, j, a) table: 2ⁿ · (n + 1) · (A + 1)
+    states_reached: int  # cells given a finite time (reachable within the budget)
+    reachable_subsets: int  # subsets S with at least one reached state
 
 
 def solve(instance: PlanningInstance, top_k: int = 5) -> DPResult:
@@ -128,8 +131,16 @@ def solve(instance: PlanningInstance, top_k: int = 5) -> DPResult:
         if plan is None or abs(plan.completion_time - completion[mask]) > 1e-6:
             raise AssertionError(f"DP reconstruction inconsistent for mask {mask:b}")
         top.append(plan)
+    reached = np.isfinite(cost)
     return DPResult(
-        best=top[0], top=top, completion_time=completion, scores=scores, feasible=feasible
+        best=top[0],
+        top=top,
+        completion_time=completion,
+        scores=scores,
+        feasible=feasible,
+        state_space=int(cost.size),
+        states_reached=int(reached.sum()),
+        reachable_subsets=int(reached.reshape(size, -1).any(axis=1).sum()),
     )
 
 

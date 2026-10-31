@@ -79,6 +79,12 @@ class MissionRateOut(BaseModel):
     succeeded: ProbabilityOut
 
 
+class ConvergencePointOut(BaseModel):
+    trials: int
+    mean: float
+    interval: IntervalOut
+
+
 class PlanSimulationOut(BaseModel):
     label: str
     runs: list[list[str]]
@@ -91,6 +97,9 @@ class PlanSimulationOut(BaseModel):
     completion_histogram: HistogramOut
     score_ecdf: list[tuple[float, float]]
     missions: list[MissionRateOut]
+    convergence: list[ConvergencePointOut] = Field(
+        description="Running mean score with its 95 % interval after 10, 20, 50, … trials"
+    )
     analytic_expected_score: float = Field(
         description="Expected score of this plan under the deterministic planning model"
     )

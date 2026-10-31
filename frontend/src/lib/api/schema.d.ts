@@ -434,6 +434,14 @@ export interface components {
        */
       time_budget: number;
     };
+    /** ConvergencePointOut */
+    ConvergencePointOut: {
+      interval: components["schemas"]["IntervalOut"];
+      /** Mean */
+      mean: number;
+      /** Trials */
+      trials: number;
+    };
     /**
      * CountsSuccess
      * @description Success measured in practice: ``successes`` out of ``attempts``.
@@ -471,6 +479,41 @@ export interface components {
       kind: "counts";
       /** Successes */
       successes: number;
+    };
+    /**
+     * DPSummaryOut
+     * @description What the exact optimiser examined, for the educational view.
+     */
+    DPSummaryOut: {
+      /**
+       * Best Sets
+       * @description Feasible subsets with the highest expected score (ties: shorter time)
+       */
+      best_sets: components["schemas"]["MissionSetOut"][];
+      /**
+       * Feasible Subsets
+       * @description Subsets that can be completed within the budget
+       */
+      feasible_subsets: number;
+      /** Missions */
+      missions: number;
+      /** Reachable Subsets */
+      reachable_subsets: number;
+      /**
+       * State Space
+       * @description Cells of the C(S, j, a) table
+       */
+      state_space: number;
+      /**
+       * States Reached
+       * @description Cells reached within the time budget
+       */
+      states_reached: number;
+      /**
+       * Subsets
+       * @description 2ⁿ subsets of the candidate missions
+       */
+      subsets: number;
     };
     /** DifferenceOut */
     DifferenceOut: {
@@ -908,6 +951,15 @@ export interface components {
       started: components["schemas"]["ProbabilityOut"];
       succeeded: components["schemas"]["ProbabilityOut"];
     };
+    /** MissionSetOut */
+    MissionSetOut: {
+      /** Completion Time */
+      completion_time: number;
+      /** Expected Score */
+      expected_score: number;
+      /** Missions */
+      missions: string[];
+    };
     /**
      * MotionProfile
      * @description Speed limits for one degree of freedom.
@@ -1025,6 +1077,7 @@ export interface components {
       candidates: string[];
       /** Compute Seconds */
       compute_seconds: number;
+      dp_summary: components["schemas"]["DPSummaryOut"] | null;
       /** Excluded */
       excluded: components["schemas"]["ExcludedOut"][];
       explanation: components["schemas"]["ExplanationOut"] | null;
@@ -1057,6 +1110,11 @@ export interface components {
       analytic_expected_score: number;
       completion_histogram: components["schemas"]["HistogramOut"];
       completion_time: components["schemas"]["SummaryOut"];
+      /**
+       * Convergence
+       * @description Running mean score with its 95 % interval after 10, 20, 50, … trials
+       */
+      convergence: components["schemas"]["ConvergencePointOut"][];
       /** Label */
       label: string;
       /** Missions */

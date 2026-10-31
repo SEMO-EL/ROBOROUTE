@@ -429,6 +429,28 @@
         "title": "CompetitionFormat",
         "type": "object"
       },
+      "ConvergencePointOut": {
+        "properties": {
+          "interval": {
+            "$ref": "#/components/schemas/IntervalOut"
+          },
+          "mean": {
+            "title": "Mean",
+            "type": "number"
+          },
+          "trials": {
+            "title": "Trials",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "trials",
+          "mean",
+          "interval"
+        ],
+        "title": "ConvergencePointOut",
+        "type": "object"
+      },
       "CountsSuccess-Input": {
         "additionalProperties": false,
         "description": "Success measured in practice: ``successes`` out of ``attempts``.\n\nThe point estimate is the posterior mean under a uniform Beta(1, 1) prior,\n``(s + 1) / (n + 2)`` (Laplace's rule of succession). It never returns exactly 0 or 1, because\na finite number of practice runs cannot establish certainty.",
@@ -488,6 +510,58 @@
           "attempts"
         ],
         "title": "CountsSuccess",
+        "type": "object"
+      },
+      "DPSummaryOut": {
+        "description": "What the exact optimiser examined, for the educational view.",
+        "properties": {
+          "best_sets": {
+            "description": "Feasible subsets with the highest expected score (ties: shorter time)",
+            "items": {
+              "$ref": "#/components/schemas/MissionSetOut"
+            },
+            "title": "Best Sets",
+            "type": "array"
+          },
+          "feasible_subsets": {
+            "description": "Subsets that can be completed within the budget",
+            "title": "Feasible Subsets",
+            "type": "integer"
+          },
+          "missions": {
+            "title": "Missions",
+            "type": "integer"
+          },
+          "reachable_subsets": {
+            "title": "Reachable Subsets",
+            "type": "integer"
+          },
+          "state_space": {
+            "description": "Cells of the C(S, j, a) table",
+            "title": "State Space",
+            "type": "integer"
+          },
+          "states_reached": {
+            "description": "Cells reached within the time budget",
+            "title": "States Reached",
+            "type": "integer"
+          },
+          "subsets": {
+            "description": "2\u207f subsets of the candidate missions",
+            "title": "Subsets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "missions",
+          "subsets",
+          "state_space",
+          "states_reached",
+          "reachable_subsets",
+          "feasible_subsets",
+          "best_sets"
+        ],
+        "title": "DPSummaryOut",
         "type": "object"
       },
       "DifferenceOut": {
@@ -1593,6 +1667,32 @@
         "title": "MissionRateOut",
         "type": "object"
       },
+      "MissionSetOut": {
+        "properties": {
+          "completion_time": {
+            "title": "Completion Time",
+            "type": "number"
+          },
+          "expected_score": {
+            "title": "Expected Score",
+            "type": "number"
+          },
+          "missions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "missions",
+          "expected_score",
+          "completion_time"
+        ],
+        "title": "MissionSetOut",
+        "type": "object"
+      },
       "MotionProfile-Input": {
         "additionalProperties": false,
         "description": "Speed limits for one degree of freedom.\n\nFor translation: ``max_speed`` in m/s and ``acceleration`` in m/s\u00b2.\nFor rotation: ``max_speed`` in rad/s and ``acceleration`` in rad/s\u00b2.\n``acceleration = None`` means a constant-speed model (instant start and stop).\n\n``provenance`` records where the numbers came from: ``calibrated`` (fitted from the user's\nmeasurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).",
@@ -1830,6 +1930,16 @@
             "title": "Compute Seconds",
             "type": "number"
           },
+          "dp_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DPSummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "excluded": {
             "items": {
               "$ref": "#/components/schemas/ExcludedOut"
@@ -1883,6 +1993,7 @@
           "alternatives",
           "greedy",
           "explanation",
+          "dp_summary",
           "sensitivity",
           "assumptions",
           "compute_seconds"
@@ -1960,6 +2071,14 @@
           },
           "completion_time": {
             "$ref": "#/components/schemas/SummaryOut"
+          },
+          "convergence": {
+            "description": "Running mean score with its 95 % interval after 10, 20, 50, \u2026 trials",
+            "items": {
+              "$ref": "#/components/schemas/ConvergencePointOut"
+            },
+            "title": "Convergence",
+            "type": "array"
           },
           "label": {
             "title": "Label",
@@ -2039,6 +2158,7 @@
           "completion_histogram",
           "score_ecdf",
           "missions",
+          "convergence",
           "analytic_expected_score",
           "planned_time"
         ],

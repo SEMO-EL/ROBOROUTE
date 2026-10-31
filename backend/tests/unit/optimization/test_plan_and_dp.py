@@ -110,3 +110,15 @@ def test_dp_finds_every_feasible_set(instance: PlanningInstance) -> None:
             if plan is not None:
                 assert result.feasible[plan.mask]
                 assert result.completion_time[plan.mask] <= plan.completion_time + 1e-6
+
+
+def test_dp_counts_the_states_it_reached() -> None:
+    # Two missions, plenty of time: (∅, home), ({0}, 0), ({1}, 1), ({0,1}, 0), ({0,1}, 1).
+    result = solve(simple_instance([10, 20], [3, 4], budget=100))
+    assert result.state_space == 4 * 3 * 1
+    assert result.states_reached == 5
+    assert result.reachable_subsets == 4
+    # Nothing fits: only the start state is ever reached.
+    tight = solve(simple_instance([10, 20], [3, 4], budget=1))
+    assert tight.states_reached == 1
+    assert tight.reachable_subsets == 1

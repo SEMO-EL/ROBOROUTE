@@ -59,3 +59,14 @@ def test_cycle_is_a_422_with_issues(client: TestClient) -> None:
     body = response.json()
     assert body["code"] == "invalid_constraints"
     assert "bridge" in body["details"][0]["message"]
+
+
+def test_dp_summary(client: TestClient) -> None:
+    body = optimize(client, load("b-medium"))
+    summary = body["dp_summary"]
+    assert summary["missions"] == 7
+    assert summary["subsets"] == 2**7
+    assert 0 < summary["feasible_subsets"] <= 2**7
+    best = summary["best_sets"][0]
+    assert best["expected_score"] == body["optimal"]["expected_score"]
+    assert sorted(best["missions"]) == sorted(m for run in body["optimal"]["runs"] for m in run)
