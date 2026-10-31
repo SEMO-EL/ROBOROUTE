@@ -112,6 +112,9 @@ class RouteResponse(BaseModel):
     search: SearchStatsOut | None
     timing: TimingOut | None
     trace: TraceOut | None
+    start_cell: tuple[int, int] | None = Field(description="Grid cell (column, row) of the start")
+    goal_cell: tuple[int, int] | None
+    grid_path: list[tuple[int, int]] = Field(description="Cells of the grid path; empty if none")
 
     @classmethod
     def of(
@@ -128,6 +131,9 @@ class RouteResponse(BaseModel):
             search=SearchStatsOut.of(route.search) if route.search else None,
             timing=TimingOut.of(timing) if timing else None,
             trace=TraceOut.of(tracer) if tracer else None,
+            start_cell=route.start_cell,
+            goal_cell=route.goal_cell,
+            grid_path=route.grid_path,
         )
 
 

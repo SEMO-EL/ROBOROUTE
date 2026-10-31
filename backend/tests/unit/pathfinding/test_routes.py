@@ -13,6 +13,7 @@ from roboroute.engine.pathfinding.routes import (
     polyline_length,
 )
 from roboroute.engine.pathfinding.smoothing import shortcut
+from roboroute.engine.pathfinding.trace import RecordingTracer
 from tests.factories import scenario_dict
 
 
@@ -124,3 +125,32 @@ def test_shortcut_with_nothing_visible_keeps_the_path() -> None:
 def test_route_clearance_field_is_shared() -> None:
     planner = _planner()
     assert isinstance(planner.field, ClearanceField)
+
+
+def test_route_reports_the_grid_cells_it_searched() -> None:
+    planner = _planner()
+    tracer = RecordingTracer()
+    result = planner.plan((0.3, 0.3), (1.6, 0.9), RouteOptions(), tracer)
+    assert result.start_cell == planner.snap((0.3, 0.3))
+    assert result.goal_cell == planner.snap((1.6, 0.9))
+    assert result.grid_path[0] == result.start_cell
+    assert result.grid_path[-1] == result.goal_cell
+    expansions = [e.cell for e in tracer.events if e.kind == "expand"]
+    assert expansions[0] == result.start_cell
+    assert expansions[-1] == result.goal_cell
+
+
+def test_unreachable_route_still_names_its_cells() -> None:
+    planner = _planner(
+        obstacles=[
+            {
+                "id": "divider",
+                "label": "Divider",
+                "kind": "solid",
+                "shape": {"kind": "rect", "cx": 1.0, "cy": 0.6, "width": 0.05, "height": 1.2},
+            }
+        ]
+    )
+    result = planner.plan((0.3, 0.3), (1.6, 0.9), RouteOptions())
+    assert result.goal_cell == planner.snap((1.6, 0.9))
+    assert result.grid_path == []

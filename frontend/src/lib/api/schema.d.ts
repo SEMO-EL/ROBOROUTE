@@ -1458,6 +1458,13 @@ export interface components {
     };
     /** RouteResponse */
     RouteResponse: {
+      /** Goal Cell */
+      goal_cell: [number, number] | null;
+      /**
+       * Grid Path
+       * @description Cells of the grid path; empty if none
+       */
+      grid_path: [number, number][];
       /** Length Raw */
       length_raw: number | null;
       /** Length Smoothed */
@@ -1469,6 +1476,11 @@ export interface components {
       search: components["schemas"]["SearchStatsOut"] | null;
       /** Smoothed Points */
       smoothed_points: [number, number][];
+      /**
+       * Start Cell
+       * @description Grid cell (column, row) of the start
+       */
+      start_cell: [number, number] | null;
       /**
        * Status
        * @enum {string}

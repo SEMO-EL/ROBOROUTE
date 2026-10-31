@@ -39,6 +39,9 @@ def test_plan_route_with_trace(client: TestClient) -> None:
     first = trace["events"][0]
     assert first["kind"] == "expand"
     assert {"cell", "g", "h", "f"} <= first.keys()
+    assert first["cell"] == route["start_cell"]
+    assert route["grid_path"][0] == route["start_cell"]
+    assert route["grid_path"][-1] == route["goal_cell"]
 
 
 def test_unknown_node_is_a_422(client: TestClient) -> None:

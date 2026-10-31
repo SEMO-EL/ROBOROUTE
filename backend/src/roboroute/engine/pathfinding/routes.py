@@ -7,7 +7,7 @@ drop collinear points → line-of-sight smoothing with the exact clearance check
 
 import itertools
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 from typing import Literal
 
@@ -57,6 +57,10 @@ class RouteResult:
     length_raw: float
     length_smoothed: float
     search: SearchStats | None
+    # Grid cells the search ran between, and the cell path it found (empty if none).
+    start_cell: Cell | None = None
+    goal_cell: Cell | None = None
+    grid_path: list[Cell] = field(default_factory=list)
 
     @property
     def optimality_guaranteed(self) -> bool:
@@ -184,7 +188,10 @@ class RoutePlanner:
             stats = SearchStats(
                 result.algorithm, result.expanded, result.cost, result.optimality_guaranteed
             )
-            return self._finish(start, goal, result.path, stats, options.smooth)
+            finished = self._finish(start, goal, result.path, stats, options.smooth)
+            return replace(
+                finished, start_cell=start_cell, goal_cell=goal_cell, grid_path=result.path or []
+            )
 
         tree = dijkstra(self.grid, start_cell, [goal_cell], options.connectivity, tracer)
         stats = SearchStats(
@@ -193,7 +200,9 @@ class RoutePlanner:
             tree.dist.get(goal_cell, math.inf),
             True,
         )
-        return self._finish(start, goal, tree.path_to(goal_cell), stats, options.smooth)
+        cells = tree.path_to(goal_cell)
+        finished = self._finish(start, goal, cells, stats, options.smooth)
+        return replace(finished, start_cell=start_cell, goal_cell=goal_cell, grid_path=cells or [])
 
     def plan_from(
         self, start: Point, goals: list[Point], connectivity: int = 8, smooth: bool = True

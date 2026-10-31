@@ -2803,6 +2803,45 @@
       },
       "RouteResponse": {
         "properties": {
+          "goal_cell": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Cell"
+          },
+          "grid_path": {
+            "description": "Cells of the grid path; empty if none",
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Grid Path",
+            "type": "array"
+          },
           "length_raw": {
             "anyOf": [
               {
@@ -2873,6 +2912,28 @@
             "title": "Smoothed Points",
             "type": "array"
           },
+          "start_cell": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Grid cell (column, row) of the start",
+            "title": "Start Cell"
+          },
           "status": {
             "enum": [
               "ok",
@@ -2913,7 +2974,10 @@
           "length_smoothed",
           "search",
           "timing",
-          "trace"
+          "trace",
+          "start_cell",
+          "goal_cell",
+          "grid_path"
         ],
         "title": "RouteResponse",
         "type": "object"
