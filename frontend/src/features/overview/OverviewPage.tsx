@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 import { ErrorAlert } from "@/components/Alert";
 import { api, unwrap, type Schemas } from "@/lib/api/client";
+import { blankScenario } from "@/lib/scenario/blank";
 import { useProjectStore } from "@/stores/project";
 
 import { ScenarioSummary } from "./ScenarioSummary";
@@ -20,6 +22,13 @@ export function OverviewPage({ client = api }: { client?: ApiClient }) {
   const status = useProjectStore((s) => s.status);
   const loadError = useProjectStore((s) => s.error);
   const loadExample = useProjectStore((s) => s.loadExample);
+  const replace = useProjectStore((s) => s.replace);
+  const navigate = useNavigate();
+
+  function startBlank(kind: "single_run" | "multi_run") {
+    replace(blankScenario(kind));
+    void navigate("/arena");
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +80,37 @@ export function OverviewPage({ client = api }: { client?: ApiClient }) {
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="blank-title" className="flex flex-col gap-2">
+        <h2 id="blank-title" className="text-xs font-medium tracking-wide text-muted uppercase">
+          Or start from a blank field
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              startBlank("multi_run");
+            }}
+            className="cursor-pointer rounded-md border border-border bg-surface px-3 py-2 text-left hover:bg-surface-2"
+          >
+            <span className="block font-medium">Several runs from home</span>
+            <span className="text-xs text-muted">FLL Challenge style · 150 s match</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              startBlank("single_run");
+            }}
+            className="cursor-pointer rounded-md border border-border bg-surface px-3 py-2 text-left hover:bg-surface-2"
+          >
+            <span className="block font-medium">One continuous run</span>
+            <span className="text-xs text-muted">WRO RoboMission style · 120 s attempt</span>
+          </button>
+        </div>
+        <p className="text-xs text-muted">
+          Set the field size, obstacles and missions to match your own table and season rules.
+        </p>
       </section>
 
       {status === "loading" && <p className="text-muted">Loading scenario…</p>}
