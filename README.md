@@ -43,10 +43,14 @@ unprivileged user, needs no secrets and reports its health at `/api/v1/health`. 
 rate-limits the base images, pass a mirror, e.g.
 `--build-arg NODE_IMAGE=mirror.gcr.io/library/node:22.22-bookworm-slim --build-arg PYTHON_IMAGE=mirror.gcr.io/library/python:3.13-slim-bookworm`.
 
-### As a public website (Render)
+### As a public website
 
-`render.yaml` deploys the same container to [Render](https://render.com) with limits suited to a
-public site; see [docs/deploy-render.md](docs/deploy-render.md) for the steps.
+- **Hugging Face Spaces** (free, no card needed): a GitHub Action publishes `main` to a Space
+  after CI passes; see [docs/deploy-huggingface.md](docs/deploy-huggingface.md).
+- **Render** (free tier needs a card): `render.yaml` deploys the same container; see
+  [docs/deploy-render.md](docs/deploy-render.md).
+
+Both add limits suited to a public site (requests per visitor, calculations at once).
 
 ### For development
 
@@ -90,6 +94,7 @@ and commit the result. After changing an example scenario, run
 | `ROBOROUTE_MAX_BODY_BYTES` | `1000000` | Maximum request body size |
 | `ROBOROUTE_RATE_LIMIT_PER_MINUTE` | `0` (off) | Heavy calculations (routes, optimise, simulate) allowed per client address per minute |
 | `ROBOROUTE_MAX_CONCURRENT_JOBS` | `0` (off) | Heavy calculations running at once; others wait up to 30 s, then get "busy" |
+| `ROBOROUTE_FRAME_ANCESTORS` | unset (no framing) | Space-separated sites allowed to show the app in a frame (e.g. `https://huggingface.co`) |
 | `PORT` (container) | `8000` | Port the container listens on (set by hosting platforms) |
 | `FORWARDED_ALLOW_IPS` (container) | `127.0.0.1` | Proxies trusted for the client address; `*` behind a platform proxy |
 | `VITE_API_BASE` (frontend build) | page origin | API origin if the API is hosted separately |
