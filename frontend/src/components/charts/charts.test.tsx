@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 
+import { ConvergenceChart } from "./ConvergenceChart";
 import { EcdfChart } from "./EcdfChart";
 import { Histogram } from "./Histogram";
 import { RateBars } from "./RateBars";
@@ -90,5 +91,29 @@ describe("RateBars", () => {
     if (!chart) throw new Error("expected the bar list");
     expect(within(chart).getByText("80%")).toBeInTheDocument();
     expect(screen.getByTitle(/95% interval 70%–88%/)).toBeInTheDocument();
+  });
+});
+
+describe("ConvergenceChart", () => {
+  const points = [10, 100, 1000].map((trials) => ({
+    trials,
+    mean: 50,
+    interval: { low: 50 - 30 / Math.sqrt(trials), high: 50 + 30 / Math.sqrt(trials) },
+  }));
+
+  it("labels the model reference line and lists every checkpoint in the table", () => {
+    render(<ConvergenceChart title="Running mean" points={points} reference={48} />);
+    expect(screen.getByText(/planning model 48\.0/i)).toBeInTheDocument();
+    const table = screen.getByRole("table");
+    expect(within(table).getAllByRole("row")).toHaveLength(1 + 3);
+    // Half-width × √n stays constant when the interval shrinks like 1/√n.
+    expect(within(table).getAllByText("30.0")).toHaveLength(3);
+  });
+
+  it("shows a checkpoint's interval on hover", () => {
+    render(<ConvergenceChart title="Running mean" points={points} reference={null} />);
+    fireEvent.pointerEnter(screen.getByTestId("checkpoint-100"));
+    expect(screen.getByRole("tooltip")).toHaveTextContent("100 trials");
+    expect(screen.getByRole("tooltip")).toHaveTextContent("47.0 – 53.0");
   });
 });
