@@ -4,8 +4,10 @@ import time
 
 import numpy
 from fastapi import APIRouter
+from fastapi.responses import Response
 
 import roboroute
+from roboroute.api.csv_export import to_csv
 from roboroute.api.errors import ApiError
 from roboroute.api.routes.routing import check_matrix_work
 from roboroute.api.schemas.simulate import (
@@ -20,9 +22,13 @@ from roboroute.api.schemas.simulate import (
     SimulationMetadata,
     SummaryOut,
 )
-from roboroute.engine.optimization.instance import PlanningError, compile_instance
+from roboroute.engine.optimization.instance import (
+    PlanningError,
+    PlanningInstance,
+    compile_instance,
+)
 from roboroute.engine.optimization.plan import evaluate
-from roboroute.engine.simulation.compare import SimulatedPlan, compare
+from roboroute.engine.simulation.compare import Comparison, SimulatedPlan, compare
 from roboroute.engine.simulation.runner import PlanError
 from roboroute.engine.stats.summary import ecdf, histogram, proportion, summarize
 from roboroute.engine.travel.matrix import build_travel_matrix
@@ -47,10 +53,7 @@ def _probability(flags: numpy.typing.NDArray[numpy.bool_]) -> ProbabilityOut:
     return ProbabilityOut(estimate=estimate, interval=IntervalOut.of(interval))
 
 
-@router.post("/simulate")
-def simulate_plans(request: SimulateRequest) -> SimulateResponse:
-    """Monte Carlo evaluation of one plan, or a fair comparison of up to three plans."""
-    started = time.perf_counter()
+def _run(request: SimulateRequest) -> tuple[PlanningInstance, Comparison]:
     config = request.config
     total = config.trials * len(request.plans)
     if total > MAX_TOTAL_TRIALS:
@@ -74,6 +77,59 @@ def simulate_plans(request: SimulateRequest) -> SimulateResponse:
         ) from error
     except PlanError as error:
         raise ApiError(422, "invalid_plan", str(error)) from error
+    return instance, result
+
+
+@router.post(
+    "/simulate/trials",
+    response_class=Response,
+    responses={200: {"content": {"text/csv": {}}, "description": "One row per simulated match"}},
+)
+def simulate_trials_csv(request: SimulateRequest) -> Response:
+    """Per-trial results as CSV, regenerated deterministically from the request and its seed."""
+    _, result = _run(request)
+    missions = sorted({m for plan in result.plans for m in plan.trials.missions})
+    header = [
+        "plan",
+        "trial",
+        "score",
+        "completion_time_s",
+        "cut_off",
+        "skipped_for_time",
+        *(f"{m}_succeeded" for m in missions),
+    ]
+    rows: list[list[str | int | float | bool]] = []
+    for plan in result.plans:
+        trials = plan.trials
+        column = {m: c for c, m in enumerate(trials.missions)}
+        for t in range(trials.score.size):
+            rows.append(
+                [
+                    plan.label,
+                    t,
+                    float(trials.score[t]),
+                    float(trials.completion_time[t]),
+                    bool(trials.cut_off[t]),
+                    bool(trials.skipped_for_time[t]),
+                    *(
+                        bool(trials.succeeded[t, column[m]]) if m in column else ""
+                        for m in missions
+                    ),
+                ]
+            )
+    return Response(
+        content=to_csv(header, rows),
+        media_type="text/csv",
+        headers={"content-disposition": 'attachment; filename="roboroute-trials.csv"'},
+    )
+
+
+@router.post("/simulate")
+def simulate_plans(request: SimulateRequest) -> SimulateResponse:
+    """Monte Carlo evaluation of one plan, or a fair comparison of up to three plans."""
+    started = time.perf_counter()
+    config = request.config
+    instance, result = _run(request)
 
     index = {mission: i for i, mission in enumerate(instance.ids)}
 

@@ -4269,6 +4269,44 @@
         ]
       }
     },
+    "/api/v1/simulate/trials": {
+      "post": {
+        "description": "Per-trial results as CSV, regenerated deterministically from the request and its seed.",
+        "operationId": "simulate_trials_csv_api_v1_simulate_trials_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {}
+            },
+            "description": "One row per simulated match"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Simulate Trials Csv",
+        "tags": [
+          "simulate"
+        ]
+      }
+    },
     "/api/v1/version": {
       "get": {
         "description": "Versions that affect numerical results; recorded with every experiment.",

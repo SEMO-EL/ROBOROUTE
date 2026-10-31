@@ -202,6 +202,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/simulate/trials": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Simulate Trials Csv
+     * @description Per-trial results as CSV, regenerated deterministically from the request and its seed.
+     */
+    post: operations["simulate_trials_csv_api_v1_simulate_trials_post"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/version": {
     parameters: {
       query?: never;
@@ -2102,6 +2122,39 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["SimulateResponse"];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  simulate_trials_csv_api_v1_simulate_trials_post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SimulateRequest"];
+      };
+    };
+    responses: {
+      /** @description One row per simulated match */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "text/csv": unknown;
         };
       };
       /** @description Validation Error */
