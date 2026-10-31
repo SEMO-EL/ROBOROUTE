@@ -40,7 +40,11 @@ const GENERIC_IDS = new Set(["obstacle", "mission", "keep-out", "zone"]);
 /** `base` itself if it is free and specific; otherwise the first free base-1, base-2, … */
 export function uniqueId(scenario: Scenario, base: string): string {
   const taken = allIds(scenario);
-  const clean = base.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").slice(0, 50) || "item";
+  const clean =
+    base
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .slice(0, 50) || "item";
   if (!taken.has(clean) && !GENERIC_IDS.has(clean)) return clean;
   for (let n = 1; ; n += 1) {
     const candidate = `${clean}-${n}`;
@@ -70,7 +74,10 @@ export function addObstacle(
     kind,
     shape,
   };
-  return { scenario: withArena(scenario, { obstacles: [...scenario.arena.obstacles, obstacle] }), id };
+  return {
+    scenario: withArena(scenario, { obstacles: [...scenario.arena.obstacles, obstacle] }),
+    id,
+  };
 }
 
 export function newMission(id: string, at: Vec2, name: string): Mission {
@@ -114,7 +121,9 @@ export function deleteSelection(scenario: Scenario, selection: Selection): Scena
     return withArena(scenario, { obstacles: scenario.arena.obstacles.filter((o) => o.id !== id) });
   }
   if (selection.kind === "zone") {
-    return withArena(scenario, { home_zones: scenario.arena.home_zones.filter((z) => z.id !== id) });
+    return withArena(scenario, {
+      home_zones: scenario.arena.home_zones.filter((z) => z.id !== id),
+    });
   }
   // A mission: remove it and everything that names it, so the scenario stays valid.
   return {
@@ -129,25 +138,39 @@ export function deleteSelection(scenario: Scenario, selection: Selection): Scena
         rule.kind === "all_of_bonus" ? !rule.missions.includes(id) : rule.mission !== id,
       ),
     },
-    travel_overrides: scenario.travel_overrides.filter((o) => !refersTo([o.from_node, o.to_node], id)),
+    travel_overrides: scenario.travel_overrides.filter(
+      (o) => !refersTo([o.from_node, o.to_node], id),
+    ),
   };
 }
 
-export function updateShape(scenario: Scenario, obstacleId: string, patch: Partial<Record<string, number>>): Scenario {
+export function updateShape(
+  scenario: Scenario,
+  obstacleId: string,
+  patch: Partial<Record<string, number>>,
+): Scenario {
   return withArena(scenario, {
     obstacles: scenario.arena.obstacles.map((o) =>
-      o.id === obstacleId ? { ...o, shape: { ...o.shape, ...patch } as Shape } : o,
+      o.id === obstacleId ? { ...o, shape: { ...o.shape, ...patch } } : o,
     ),
   });
 }
 
-export function updateObstacle(scenario: Scenario, obstacleId: string, patch: Partial<Omit<Obstacle, "id" | "shape">>): Scenario {
+export function updateObstacle(
+  scenario: Scenario,
+  obstacleId: string,
+  patch: Partial<Omit<Obstacle, "id" | "shape">>,
+): Scenario {
   return withArena(scenario, {
     obstacles: scenario.arena.obstacles.map((o) => (o.id === obstacleId ? { ...o, ...patch } : o)),
   });
 }
 
-export function updateZone(scenario: Scenario, zoneId: string, patch: Partial<Record<string, number>>): Scenario {
+export function updateZone(
+  scenario: Scenario,
+  zoneId: string,
+  patch: Partial<Record<string, number>>,
+): Scenario {
   return withArena(scenario, {
     home_zones: scenario.arena.home_zones.map((z) =>
       z.id === zoneId ? { ...z, shape: { ...z.shape, ...patch } } : z,
@@ -155,7 +178,11 @@ export function updateZone(scenario: Scenario, zoneId: string, patch: Partial<Re
   });
 }
 
-export function updateMission(scenario: Scenario, missionId: string, patch: Partial<Omit<Mission, "id">>): Scenario {
+export function updateMission(
+  scenario: Scenario,
+  missionId: string,
+  patch: Partial<Omit<Mission, "id">>,
+): Scenario {
   return {
     ...scenario,
     missions: scenario.missions.map((m) => (m.id === missionId ? { ...m, ...patch } : m)),
@@ -166,11 +193,15 @@ export function moveSelection(scenario: Scenario, selection: Selection, to: Vec2
   if (!selection) return scenario;
   switch (selection.kind) {
     case "start":
-      return withArena(scenario, { start_pose: { ...scenario.arena.start_pose, x: to.x, y: to.y } });
+      return withArena(scenario, {
+        start_pose: { ...scenario.arena.start_pose, x: to.x, y: to.y },
+      });
     case "mission": {
       const mission = scenario.missions.find((m) => m.id === selection.id);
       if (!mission) return scenario;
-      return updateMission(scenario, selection.id, { approach_pose: { ...mission.approach_pose, x: to.x, y: to.y } });
+      return updateMission(scenario, selection.id, {
+        approach_pose: { ...mission.approach_pose, x: to.x, y: to.y },
+      });
     }
     case "obstacle":
       return updateShape(scenario, selection.id, { cx: to.x, cy: to.y });
@@ -187,7 +218,9 @@ export function setHeading(scenario: Scenario, selection: Selection, theta: numb
   if (selection?.kind === "mission") {
     const mission = scenario.missions.find((m) => m.id === selection.id);
     if (!mission) return scenario;
-    return updateMission(scenario, selection.id, { approach_pose: { ...mission.approach_pose, theta: heading } });
+    return updateMission(scenario, selection.id, {
+      approach_pose: { ...mission.approach_pose, theta: heading },
+    });
   }
   return scenario;
 }

@@ -13,12 +13,27 @@ import type { Scenario } from "@/lib/api/client";
 import { formatLength } from "@/lib/format/units";
 import { screenToArena, type Vec2 } from "@/lib/geometry/viewport";
 
-import { ArenaDefs, ArenaGeometry, ArenaOverlay, type Selection } from "./ArenaLayers";
+import { ArenaDefs, ArenaGeometry, ArenaOverlay } from "./ArenaLayers";
+import { positionOf } from "./editing";
 import { niceScaleLength } from "./scaleBar";
+import type { Selection } from "./selection";
 import { useViewport } from "./useViewport";
 
 const ZOOM_STEP = 1.25;
 const PAN_STEP_PX = 40;
+
+export type Tool = "select" | "rect" | "circle" | "nogo" | "mission";
+export type GesturePhase = "start" | "move" | "end";
+
+export interface ArenaEditing {
+  tool: Tool;
+  /** An add-tool was used on empty space at this arena point. */
+  onPlace: (point: Vec2) => void;
+  /** The selected object is being dragged; `position` is its new centre / pose position. */
+  onDrag: (selection: Selection, position: Vec2, phase: GesturePhase) => void;
+  /** The heading handle of the selected mission / start pose is being dragged. */
+  onHeading: (selection: Selection, theta: number, phase: GesturePhase) => void;
+}
 
 interface ArenaCanvasProps {
   scenario: Scenario;
@@ -26,10 +41,24 @@ interface ArenaCanvasProps {
   onSelect: (selection: Selection) => void;
   /** Extra layers drawn in arena coordinates (metres, y up), above obstacles. */
   arenaLayers?: ReactNode;
+  /** Present when the canvas edits the scenario; absent for read-only views. */
+  editing?: ArenaEditing;
 }
 
-export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: ArenaCanvasProps) {
+type Drag =
+  | { mode: "pan"; last: Vec2 }
+  | { mode: "object"; selection: Selection; offset: Vec2; moved: boolean }
+  | { mode: "heading"; selection: Selection; origin: Vec2 };
+
+export function ArenaCanvas({
+  scenario,
+  selection,
+  onSelect,
+  arenaLayers,
+  editing,
+}: ArenaCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const size = useElementSize(containerRef);
   const { viewport, fit, zoom, pan } = useViewport(
     scenario.arena.width,
@@ -38,7 +67,7 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
   );
   const [showGrid, setShowGrid] = useState(true);
   const [cursor, setCursor] = useState<Vec2 | null>(null);
-  const drag = useRef<{ x: number; y: number } | null>(null);
+  const drag = useRef<Drag | null>(null);
 
   // React registers wheel listeners as passive, which cannot prevent page scrolling.
   useEffect(() => {
@@ -47,8 +76,10 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const rect = element.getBoundingClientRect();
-      const anchor = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-      zoom(anchor, Math.exp(-event.deltaY * 0.0015));
+      zoom(
+        { x: event.clientX - rect.left, y: event.clientY - rect.top },
+        Math.exp(-event.deltaY * 0.0015),
+      );
     };
     element.addEventListener("wheel", onWheel, { passive: false });
     return () => {
@@ -59,6 +90,7 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
   const centre = { x: size.width / 2, y: size.height / 2 };
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget || event.ctrlKey || event.metaKey) return;
     const actions: Record<string, () => void> = {
       "+": () => {
         zoom(centre, ZOOM_STEP);
@@ -70,59 +102,145 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
         zoom(centre, 1 / ZOOM_STEP);
       },
       "0": fit,
-      ArrowLeft: () => {
-        pan(PAN_STEP_PX, 0);
-      },
-      ArrowRight: () => {
-        pan(-PAN_STEP_PX, 0);
-      },
-      ArrowUp: () => {
-        pan(0, PAN_STEP_PX);
-      },
-      ArrowDown: () => {
-        pan(0, -PAN_STEP_PX);
-      },
       Escape: () => {
         onSelect(null);
       },
     };
+    // With an editable selection the page uses the arrow keys to nudge the object.
+    if (!(editing && selection)) {
+      Object.assign(actions, {
+        ArrowLeft: () => {
+          pan(PAN_STEP_PX, 0);
+        },
+        ArrowRight: () => {
+          pan(-PAN_STEP_PX, 0);
+        },
+        ArrowUp: () => {
+          pan(0, PAN_STEP_PX);
+        },
+        ArrowDown: () => {
+          pan(0, -PAN_STEP_PX);
+        },
+      });
+    }
     const action = actions[event.key];
-    if (action && event.target === event.currentTarget) {
+    if (action) {
       event.preventDefault();
       action();
     }
   }
 
-  function localPoint(event: PointerEvent): Vec2 {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  /** Pointer position in arena coordinates (always relative to the SVG, not the event target). */
+  function arenaPoint(event: PointerEvent): Vec2 {
+    const rect = svgRef.current?.getBoundingClientRect();
+    const local = { x: event.clientX - (rect?.left ?? 0), y: event.clientY - (rect?.top ?? 0) };
+    return screenToArena(viewport, local);
   }
 
-  function onPointerDown(event: PointerEvent<SVGSVGElement>) {
+  function capture(pointerId: number) {
+    const svg = svgRef.current;
+    if (svg && typeof svg.setPointerCapture === "function") svg.setPointerCapture(pointerId);
+  }
+
+  function onBackgroundPointerDown(event: PointerEvent<SVGSVGElement>) {
     if (event.button !== 0) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { x: event.clientX, y: event.clientY };
+    if (editing && editing.tool !== "select") {
+      editing.onPlace(arenaPoint(event));
+      return;
+    }
+    capture(event.pointerId);
+    drag.current = { mode: "pan", last: { x: event.clientX, y: event.clientY } };
     onSelect(null);
   }
 
+  function onObjectPointerDown(target: Selection, event: PointerEvent) {
+    onSelect(target);
+    if (!editing || editing.tool !== "select" || event.button !== 0) return;
+    const position = positionOf(scenario, target);
+    if (!position) return;
+    const point = arenaPoint(event);
+    capture(event.pointerId);
+    drag.current = {
+      mode: "object",
+      selection: target,
+      offset: { x: point.x - position.x, y: point.y - position.y },
+      moved: false,
+    };
+  }
+
+  function onHeadingPointerDown(event: PointerEvent) {
+    if (!editing || !selection) return;
+    const origin = positionOf(scenario, selection);
+    if (!origin) return;
+    capture(event.pointerId);
+    drag.current = { mode: "heading", selection, origin };
+    const point = arenaPoint(event);
+    editing.onHeading(selection, Math.atan2(point.y - origin.y, point.x - origin.x), "start");
+  }
+
   function onPointerMove(event: PointerEvent<SVGSVGElement>) {
-    setCursor(screenToArena(viewport, localPoint(event)));
-    if (drag.current) {
-      pan(event.clientX - drag.current.x, event.clientY - drag.current.y);
-      drag.current = { x: event.clientX, y: event.clientY };
+    const point = arenaPoint(event);
+    setCursor(point);
+    const current = drag.current;
+    if (!current) return;
+    if (current.mode === "pan") {
+      pan(event.clientX - current.last.x, event.clientY - current.last.y);
+      drag.current = { mode: "pan", last: { x: event.clientX, y: event.clientY } };
+    } else if (current.mode === "object" && editing) {
+      if (!current.moved) {
+        editing.onDrag(
+          current.selection,
+          { x: point.x - current.offset.x, y: point.y - current.offset.y },
+          "start",
+        );
+        current.moved = true;
+      }
+      editing.onDrag(
+        current.selection,
+        { x: point.x - current.offset.x, y: point.y - current.offset.y },
+        "move",
+      );
+    } else if (current.mode === "heading" && editing) {
+      editing.onHeading(
+        current.selection,
+        Math.atan2(point.y - current.origin.y, point.x - current.origin.x),
+        "move",
+      );
     }
   }
 
   function onPointerUp(event: PointerEvent<SVGSVGElement>) {
+    const current = drag.current;
     drag.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
+    const svg = svgRef.current;
+    if (
+      svg &&
+      typeof svg.hasPointerCapture === "function" &&
+      svg.hasPointerCapture(event.pointerId)
+    ) {
+      svg.releasePointerCapture(event.pointerId);
+    }
+    if (!editing || !current) return;
+    const point = arenaPoint(event);
+    if (current.mode === "object" && current.moved) {
+      editing.onDrag(
+        current.selection,
+        { x: point.x - current.offset.x, y: point.y - current.offset.y },
+        "end",
+      );
+    } else if (current.mode === "heading") {
+      editing.onHeading(
+        current.selection,
+        Math.atan2(point.y - current.origin.y, point.x - current.origin.x),
+        "end",
+      );
     }
   }
 
   const scaleLength = niceScaleLength(viewport.zoom);
   const buttonClass =
     "flex size-8 cursor-pointer items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-2 hover:text-text aria-pressed:text-accent";
+  const placing = editing && editing.tool !== "select";
 
   return (
     <div className="relative h-full min-h-0 w-full">
@@ -137,10 +255,12 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
         className="h-full w-full overflow-hidden bg-bg"
       >
         <svg
+          ref={svgRef}
+          data-testid="arena-svg"
           width={size.width}
           height={size.height}
-          className="block touch-none select-none"
-          onPointerDown={onPointerDown}
+          className={`block touch-none select-none ${placing ? "cursor-crosshair" : ""}`}
+          onPointerDown={onBackgroundPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerLeave={() => {
@@ -154,6 +274,7 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
             showGrid={showGrid}
             selection={selection}
             onSelect={onSelect}
+            onObjectPointerDown={onObjectPointerDown}
           />
           {arenaLayers && (
             <g
@@ -169,6 +290,8 @@ export function ArenaCanvas({ scenario, selection, onSelect, arenaLayers }: Aren
             showGrid={showGrid}
             selection={selection}
             onSelect={onSelect}
+            onObjectPointerDown={onObjectPointerDown}
+            {...(editing ? { onHeadingPointerDown } : {})}
           />
         </svg>
       </div>

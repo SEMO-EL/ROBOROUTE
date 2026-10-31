@@ -68,3 +68,20 @@ def test_internal_error_hides_details(settings: Settings) -> None:
     assert response.status_code == 500
     assert response.json()["code"] == "internal_error"
     assert "secret" not in response.text
+
+
+def test_validate_reports_constraint_cycle_as_error(client: TestClient) -> None:
+    data = scenario_dict()
+    data["constraints"].append({"kind": "precedes", "before": "m2", "after": "m1"})
+    body = client.post("/api/v1/scenarios/validate", json=data).json()
+    assert body["valid"] is False
+    assert [i["code"] for i in body["issues"]] == ["constraint_cycle"]
+
+
+def test_validate_reports_impossible_mission_as_warning(client: TestClient) -> None:
+    data = scenario_dict()
+    data["constraints"].append({"kind": "excludes", "a": "m1", "b": "m2"})
+    body = client.post("/api/v1/scenarios/validate", json=data).json()
+    assert body["valid"] is True  # warnings do not make a scenario invalid
+    assert body["issues"][0]["code"] == "impossible_mission"
+    assert body["issues"][0]["severity"] == "warning"

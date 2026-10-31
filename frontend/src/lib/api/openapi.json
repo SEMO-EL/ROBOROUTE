@@ -3739,6 +3739,7 @@
             "type": "array"
           },
           "valid": {
+            "description": "True when there are no errors (warnings are allowed)",
             "title": "Valid",
             "type": "boolean"
           }
@@ -4184,7 +4185,7 @@
     },
     "/api/v1/scenarios/validate": {
       "post": {
-        "description": "Check a scenario and list every problem found.\n\nAlways answers 200 for a JSON object, so the editor can show the issues next to the fields.",
+        "description": "Check a scenario and list every problem found: schema and reference errors first; for a\nwell-formed scenario, constraint problems (cycles are errors, missions that can never be done\nare warnings).\n\nAlways answers 200 for a JSON object, so the editor can show the issues next to the fields.",
         "operationId": "validate_scenario_api_v1_scenarios_validate_post",
         "requestBody": {
           "content": {

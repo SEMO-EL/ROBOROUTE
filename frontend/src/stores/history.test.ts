@@ -6,7 +6,11 @@ const renamed = (name: string) => ({ ...SCENARIO_A, name });
 
 describe("project history", () => {
   beforeEach(() => {
-    useProjectStore.setState({ ...useProjectStore.getInitialState(), scenario: SCENARIO_A, status: "ready" });
+    useProjectStore.setState({
+      ...useProjectStore.getInitialState(),
+      scenario: SCENARIO_A,
+      status: "ready",
+    });
   });
 
   it("undoes and redoes edits", () => {

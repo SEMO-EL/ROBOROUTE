@@ -51,6 +51,7 @@ describe("ArenaPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /Select mission Lower the bridge/ }));
     const panel = screen.getByRole("complementary", { name: "Properties" });
     expect(panel).toHaveTextContent("Lower the bridge");
-    expect(panel).toHaveTextContent("110.0 cm, 100.0 cm");
+    expect(screen.getByLabelText("Approach x (cm)")).toHaveValue("110");
+    expect(screen.getByLabelText("Approach y (cm)")).toHaveValue("100");
   });
 });

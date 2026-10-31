@@ -169,7 +169,9 @@ export interface paths {
     put?: never;
     /**
      * Validate Scenario
-     * @description Check a scenario and list every problem found.
+     * @description Check a scenario and list every problem found: schema and reference errors first; for a
+     *     well-formed scenario, constraint problems (cycles are errors, missions that can never be done
+     *     are warnings).
      *
      *     Always answers 200 for a JSON object, so the editor can show the issues next to the fields.
      */
@@ -1750,7 +1752,10 @@ export interface components {
     ValidationReport: {
       /** Issues */
       issues: components["schemas"]["Issue"][];
-      /** Valid */
+      /**
+       * Valid
+       * @description True when there are no errors (warnings are allowed)
+       */
       valid: boolean;
     };
     /** VerdictOut */
