@@ -5,9 +5,13 @@
 - **Contradictions.** If a mission's transitive requirements (plus itself) contain two missions
   that exclude each other, it can never be done: a warning (the rest of the scenario is still
   solvable; the optimiser simply leaves that mission out and says why).
+- **Placement.** A start or approach pose where the robot's collision disc touches an obstacle or
+  wall cannot be reached: a warning, shown while editing rather than discovered when optimising.
 """
 
+from roboroute.engine.geometry.clearance import ClearanceField
 from roboroute.engine.models import Excludes, Issue, Precedes, Requires, Scenario
+from roboroute.engine.units import format_point_cm
 
 
 def precedence_graph(scenario: Scenario) -> dict[str, list[str]]:
@@ -118,4 +122,48 @@ def validate_constraints(scenario: Scenario) -> list[Issue]:
                 severity="warning",
             )
         )
+    return issues
+
+
+def placement_issues(scenario: Scenario) -> list[Issue]:
+    """Poses where the robot cannot stand: its collision disc would touch an obstacle or wall.
+
+    Such a mission is left out by the optimiser; reporting it while editing avoids a surprise
+    later. Warnings, not errors: the scenario is still well formed.
+    """
+    field = ClearanceField(scenario.arena)
+    radius = scenario.robot.footprint_radius
+
+    def blocked(x: float, y: float) -> bool:
+        return field.at((x, y)) < radius - 1e-9
+
+    def message(what: str, x: float, y: float) -> str:
+        return (
+            f"{what} at {format_point_cm((x, y))} is too close to an obstacle or wall for a "
+            f"robot of collision radius {radius * 100:.1f} cm."
+        )
+
+    issues: list[Issue] = []
+    start = scenario.arena.start_pose
+    if blocked(start.x, start.y):
+        issues.append(
+            Issue(
+                code="start_in_collision",
+                message=message("The start pose", start.x, start.y) + " No route can leave it.",
+                path=["arena", "start_pose"],
+                severity="warning",
+            )
+        )
+    for index, mission in enumerate(scenario.missions):
+        pose = mission.approach_pose
+        if blocked(pose.x, pose.y):
+            issues.append(
+                Issue(
+                    code="approach_in_collision",
+                    message=message(f"The approach pose of '{mission.name}'", pose.x, pose.y)
+                    + " The robot cannot reach it, so it will be left out of every plan.",
+                    path=["missions", index, "approach_pose"],
+                    severity="warning",
+                )
+            )
     return issues

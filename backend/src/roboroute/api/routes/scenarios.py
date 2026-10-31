@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Body
 from pydantic import BaseModel, Field
 
-from roboroute.engine.missions.validation import validate_constraints
+from roboroute.engine.missions.validation import placement_issues, validate_constraints
 from roboroute.engine.models import Issue
 from roboroute.engine.models.validation import validate_scenario_payload
 
@@ -19,11 +19,11 @@ class ValidationReport(BaseModel):
 def validate_scenario(payload: Annotated[dict[str, Any], Body()]) -> ValidationReport:
     """Check a scenario and list every problem found: schema and reference errors first; for a
     well-formed scenario, constraint problems (cycles are errors, missions that can never be done
-    are warnings).
+    are warnings) and poses where the robot cannot stand (warnings).
 
     Always answers 200 for a JSON object, so the editor can show the issues next to the fields.
     """
     scenario, issues = validate_scenario_payload(payload)
     if scenario is not None:
-        issues = validate_constraints(scenario)
+        issues = [*validate_constraints(scenario), *placement_issues(scenario)]
     return ValidationReport(valid=all(i.severity != "error" for i in issues), issues=issues)

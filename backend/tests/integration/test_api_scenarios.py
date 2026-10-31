@@ -85,3 +85,11 @@ def test_validate_reports_impossible_mission_as_warning(client: TestClient) -> N
     assert body["valid"] is True  # warnings do not make a scenario invalid
     assert body["issues"][0]["code"] == "impossible_mission"
     assert body["issues"][0]["severity"] == "warning"
+
+
+def test_validation_warns_about_a_mission_the_robot_cannot_reach(client: TestClient) -> None:
+    data = scenario_dict()
+    data["missions"][1]["approach_pose"] = {"x": 1.95, "y": 0.9, "theta": 0.0}
+    report = client.post("/api/v1/scenarios/validate", json=data).json()
+    assert report["valid"] is True
+    assert [i["code"] for i in report["issues"]] == ["approach_in_collision"]

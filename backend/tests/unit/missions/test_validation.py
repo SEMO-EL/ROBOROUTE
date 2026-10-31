@@ -72,3 +72,30 @@ def test_requirement_closure_is_transitive() -> None:
     )
     closure = requirement_closure(scenario)
     assert closure == {"a": set(), "b": {"a"}, "c": {"a", "b"}}
+
+
+def test_placements_the_robot_can_occupy_have_no_issues() -> None:
+    from roboroute.engine.missions.validation import placement_issues
+
+    assert placement_issues(Scenario.model_validate(scenario_dict())) == []
+
+
+def test_approach_pose_too_close_to_a_wall_is_a_warning() -> None:
+    from roboroute.engine.missions.validation import placement_issues
+
+    data = scenario_dict()
+    data["missions"][1]["approach_pose"] = {"x": 1.95, "y": 0.9, "theta": 0.0}  # 5 cm from wall
+    issues = placement_issues(Scenario.model_validate(data))
+    assert [(i.code, i.path, i.severity) for i in issues] == [
+        ("approach_in_collision", ["missions", 1, "approach_pose"], "warning")
+    ]
+    assert "collision radius" in issues[0].message
+
+
+def test_start_pose_inside_an_obstacle_is_a_warning() -> None:
+    from roboroute.engine.missions.validation import placement_issues
+
+    data = scenario_dict()
+    data["arena"]["start_pose"] = {"x": 0.03, "y": 0.2, "theta": 0.0}
+    issues = placement_issues(Scenario.model_validate(data))
+    assert [(i.code, i.path) for i in issues] == [("start_in_collision", ["arena", "start_pose"])]
