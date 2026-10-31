@@ -44,3 +44,16 @@ describe("autosave", () => {
     expect(useProjectStore.getState().projectId).toBe(id);
   });
 });
+
+describe("examples", () => {
+  it("are not saved until the first edit", () => {
+    const { repo, stop } = setup();
+    useProjectStore.getState().replace(SCENARIO_A, null);
+    expect(repo.list().items).toHaveLength(0);
+    useProjectStore.getState().edit({ ...SCENARIO_A, name: "My version" });
+    const id = useProjectStore.getState().projectId;
+    expect(id).not.toBeNull();
+    expect(repo.get(id ?? "")?.scenario.name).toBe("My version");
+    stop();
+  });
+});

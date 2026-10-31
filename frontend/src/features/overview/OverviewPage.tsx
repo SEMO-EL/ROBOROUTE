@@ -6,6 +6,7 @@ import { api, unwrap, type Schemas } from "@/lib/api/client";
 import { blankScenario } from "@/lib/scenario/blank";
 import { useProjectStore } from "@/stores/project";
 
+import { Projects } from "./Projects";
 import { ScenarioSummary } from "./ScenarioSummary";
 
 type ApiClient = typeof api;
@@ -56,6 +57,8 @@ export function OverviewPage({ client = api }: { client?: ApiClient }) {
           simulated.
         </p>
       </header>
+
+      <Projects client={client} />
 
       <section aria-labelledby="examples-title" className="flex flex-col gap-2">
         <h2 id="examples-title" className="text-xs font-medium tracking-wide text-muted uppercase">

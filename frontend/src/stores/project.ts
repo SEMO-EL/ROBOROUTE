@@ -18,8 +18,11 @@ export interface ProjectState {
   past: Scenario[];
   future: Scenario[];
   loadExample: (id: string, client?: ApiClient) => Promise<void>;
-  /** Replace the scenario and start a fresh history; without an id a new project is created. */
-  replace: (scenario: Scenario, projectId?: string) => void;
+  /**
+   * Replace the scenario and start a fresh history. Without an id a new project is created; with
+   * `null` the scenario stays unsaved until its first edit (used for examples).
+   */
+  replace: (scenario: Scenario, projectId?: string | null) => void;
   /** A user edit: becomes one undo step. */
   edit: (next: Scenario) => void;
   /** Show an intermediate state (e.g. while dragging) without recording history. */
@@ -56,7 +59,7 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
       const scenario = await unwrap(
         client.GET("/api/v1/examples/{example_id}", { params: { path: { example_id: id } } }),
       );
-      get().replace(scenario);
+      get().replace(scenario, null);
     } catch (error) {
       set({ status: "error", error: error instanceof Error ? error.message : String(error) });
     }
@@ -64,7 +67,7 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
   replace: (scenario, projectId) => {
     set({
       scenario,
-      projectId: projectId ?? newProjectId(),
+      projectId: projectId === undefined ? newProjectId() : projectId,
       status: "ready",
       error: null,
       past: [],
@@ -72,17 +75,22 @@ export const useProjectStore = create<ProjectState>()((set, get) => ({
     });
   },
   edit: (next) => {
-    const { scenario, past } = get();
+    const { scenario, past, projectId } = get();
     if (!scenario || next === scenario) return;
-    set({ scenario: next, past: bounded([...past, scenario]), future: [] });
+    set({
+      scenario: next,
+      past: bounded([...past, scenario]),
+      future: [],
+      projectId: projectId ?? newProjectId(),
+    });
   },
   preview: (next) => {
     set({ scenario: next });
   },
   commit: (before) => {
-    const { scenario, past } = get();
+    const { scenario, past, projectId } = get();
     if (!scenario || scenario === before) return;
-    set({ past: bounded([...past, before]), future: [] });
+    set({ past: bounded([...past, before]), future: [], projectId: projectId ?? newProjectId() });
   },
   undo: () => {
     const { scenario, past, future } = get();
