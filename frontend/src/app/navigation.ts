@@ -1,4 +1,5 @@
 import {
+  Bot,
   ChartNoAxesColumn,
   Flag,
   LayoutDashboard,
@@ -27,6 +28,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: Flag,
     description: "Points, durations, reliability, constraints",
   },
+  { to: "/robot", label: "Robot", icon: Bot, description: "Size, speed and calibration" },
   { to: "/strategy", label: "Strategy", icon: Route, description: "Optimal mission plan" },
   {
     to: "/simulation",

@@ -54,3 +54,14 @@ export function simulate(client: ApiClient, body: SimulateBody) {
 }
 
 export type SimulateResult = Awaited<ReturnType<typeof simulate>>;
+
+export interface CalibrationBody {
+  kind: "linear" | "angular";
+  measurements: { amount: number; seconds: number }[];
+}
+
+export function fitCalibration(client: ApiClient, body: CalibrationBody) {
+  return unwrap(client.POST("/api/v1/calibration/fit", { body }));
+}
+
+export type CalibrationFit = Awaited<ReturnType<typeof fitCalibration>>;
