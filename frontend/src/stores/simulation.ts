@@ -9,6 +9,8 @@ type ApiClient = typeof api;
 
 export interface SimulationState {
   result: SimulateResult | null;
+  /** The request that produced `result` — saved with experiments so they can be reproduced. */
+  request: SimulateBody | null;
   scenarioKey: string | null;
   status: "idle" | "running" | "ready" | "error";
   error: string | null;
@@ -17,6 +19,7 @@ export interface SimulationState {
 
 export const useSimulationStore = create<SimulationState>()((set) => ({
   result: null,
+  request: null,
   scenarioKey: null,
   status: "idle",
   error: null,
@@ -24,7 +27,7 @@ export const useSimulationStore = create<SimulationState>()((set) => ({
     set({ status: "running", error: null });
     try {
       const result = await simulate(client, body);
-      set({ result, scenarioKey: scenarioKey(body.scenario), status: "ready" });
+      set({ result, request: body, scenarioKey: scenarioKey(body.scenario), status: "ready" });
     } catch (cause) {
       const message =
         cause instanceof ApiError || cause instanceof Error ? cause.message : String(cause);

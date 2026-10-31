@@ -1,5 +1,6 @@
 import {
   Bot,
+  FlaskConical,
   ChartNoAxesColumn,
   Flag,
   LayoutDashboard,
@@ -35,5 +36,11 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: "Simulation",
     icon: ChartNoAxesColumn,
     description: "Plans under uncertainty",
+  },
+  {
+    to: "/experiments",
+    label: "Experiments",
+    icon: FlaskConical,
+    description: "Saved runs: reproduce, compare, export",
   },
 ];

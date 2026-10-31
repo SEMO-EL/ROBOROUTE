@@ -92,3 +92,29 @@ describe("SimulationPage", () => {
     expect(others.every((box) => (box as HTMLInputElement).disabled)).toBe(true);
   });
 });
+
+describe("saving experiments", () => {
+  it("saves the run with its request so it can be reproduced", async () => {
+    const { MemoryStorage } = await import("@/lib/storage/memoryStorage");
+    const { LocalRepository, isStoredExperiment } = await import("@/lib/storage/repository");
+    const repo = new LocalRepository("experiment", isStoredExperiment, new MemoryStorage());
+    useProjectStore.setState({ scenario: SCENARIO_A, status: "ready", projectId: "p1" });
+    useStrategyStore.setState({
+      result: OPTIMIZE_RESULT,
+      scenarioKey: scenarioKey(SCENARIO_A),
+      status: "ready",
+    });
+    useSimulationStore.setState(useSimulationStore.getInitialState());
+    render(
+      <MemoryRouter>
+        <SimulationPage client={client()} experiments={repo} />
+      </MemoryRouter>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Run simulation" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Save as experiment" }));
+    const [saved] = repo.list().items;
+    expect(saved?.projectId).toBe("p1");
+    expect(saved?.request.plans.map((p) => p.label)).toEqual(["Optimal", "Greedy"]);
+    expect(await screen.findByText(/Saved as/)).toBeInTheDocument();
+  });
+});

@@ -7,8 +7,12 @@ import { Histogram } from "@/components/charts/Histogram";
 import { RateBars } from "@/components/charts/RateBars";
 import { api } from "@/lib/api/client";
 import type { OptimizeResult, SimulateResult } from "@/lib/api/endpoints";
-import { useProjectStore } from "@/stores/project";
+import type { Repository, StoredExperiment } from "@/lib/storage/repository";
+import { experiments as experimentRepo } from "@/stores/persistence";
+import { newProjectId, useProjectStore } from "@/stores/project";
 import { useSimulationStore } from "@/stores/simulation";
+
+import { Insight, Ranking } from "./results";
 import { scenarioKey, useStrategyStore } from "@/stores/strategy";
 
 type ApiClient = typeof api;
@@ -67,87 +71,6 @@ function Field({
 }
 
 const inputClass = "rounded-md border border-border bg-surface-2 px-2 py-1.5 font-mono text-text";
-
-function Insight({ result }: { result: SimulateResult }) {
-  const [reference] = result.plans;
-  if (!reference) return null;
-  const better = result.differences
-    .filter((d) => d.interval.low > 0)
-    .sort((a, b) => b.mean - a.mean)[0];
-  if (!better) return null;
-  return (
-    <p
-      role="note"
-      className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-warning"
-    >
-      Under uncertainty, {better.plan} scores more on average than {reference.label}: +
-      {fmt(better.mean)} expected points (95% interval +{fmt(better.interval.low)} to +
-      {fmt(better.interval.high)}). The planning model uses mean durations; the simulation also
-      counts runs that hit the buzzer.
-    </p>
-  );
-}
-
-function Ranking({ result, target }: { result: SimulateResult; target: number | null }) {
-  const difference = (label: string) => result.differences.find((d) => d.plan === label);
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left">
-        <thead className="text-xs text-muted">
-          <tr>
-            <th className="py-1.5 pr-3 font-medium">Plan</th>
-            <th
-              className="py-1.5 pr-3 font-medium"
-              title="Expected score under the deterministic planning model"
-            >
-              Planning model
-            </th>
-            <th className="py-1.5 pr-3 font-medium">Simulated mean (95% CI)</th>
-            {target !== null && <th className="py-1.5 pr-3 font-medium">P(score ≥ {target})</th>}
-            <th className="py-1.5 pr-3 font-medium">Cut off by buzzer</th>
-            <th className="py-1.5 font-medium">vs {result.plans[0]?.label}</th>
-          </tr>
-        </thead>
-        <tbody className="font-mono text-[13px]">
-          {result.plans.map((plan) => {
-            const d = difference(plan.label);
-            return (
-              <tr key={plan.label} className="border-t border-border">
-                <td className="py-1.5 pr-3 font-sans">{plan.label}</td>
-                <td className="py-1.5 pr-3">{fmt(plan.analytic_expected_score)}</td>
-                <td className="py-1.5 pr-3">
-                  {fmt(plan.score.mean)}{" "}
-                  <span className="text-muted">
-                    ({fmt(plan.score.mean_ci.low)}–{fmt(plan.score.mean_ci.high)})
-                  </span>
-                </td>
-                {target !== null && (
-                  <td className="py-1.5 pr-3">
-                    {plan.probability_target ? pct(plan.probability_target.estimate) : "—"}
-                  </td>
-                )}
-                <td className="py-1.5 pr-3">{pct(plan.probability_cut_off.estimate)}</td>
-                <td className="py-1.5">
-                  {d ? (
-                    <>
-                      {d.mean >= 0 ? "+" : ""}
-                      {fmt(d.mean)}{" "}
-                      <span className="text-muted">
-                        ({fmt(d.interval.low)}…{fmt(d.interval.high)})
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-muted">reference</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 function PlanDetail({
   plan,
@@ -236,10 +159,18 @@ function PlanDetail({
   );
 }
 
-export function SimulationPage({ client = api }: { client?: ApiClient }) {
+export function SimulationPage({
+  client = api,
+  experiments = experimentRepo,
+}: {
+  client?: ApiClient;
+  experiments?: Repository<StoredExperiment>;
+}) {
   const scenario = useProjectStore((s) => s.scenario);
+  const projectId = useProjectStore((s) => s.projectId);
+  const [saved, setSaved] = useState<{ ok: boolean; text: string } | null>(null);
   const strategy = useStrategyStore();
-  const { result, status, error, run } = useSimulationStore();
+  const { result, request, status, error, run } = useSimulationStore();
   const [selected, setSelected] = useState<string[]>(["Optimal", "Greedy"]);
   const [trials, setTrials] = useState(10_000);
   const [seed, setSeed] = useState(1);
@@ -284,6 +215,7 @@ export function SimulationPage({ client = api }: { client?: ApiClient }) {
     if (!scenario) return;
     const chosen = plans.filter((p) => selected.includes(p.label));
     setDetail(0);
+    setSaved(null);
     void run(
       {
         scenario,
@@ -450,7 +382,45 @@ export function SimulationPage({ client = api }: { client?: ApiClient }) {
       {current && (
         <>
           <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-            <h2 className="font-semibold">Plans compared</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="mr-auto font-semibold">Plans compared</h2>
+              <button
+                type="button"
+                disabled={!request}
+                onClick={() => {
+                  if (!request) return;
+                  const name = `${scenario.name} — ${request.plans.map((p) => p.label).join(" vs ")}`;
+                  try {
+                    experiments.save({
+                      id: newProjectId(),
+                      name,
+                      createdAt: new Date().toISOString(),
+                      projectId,
+                      request,
+                      result: current,
+                    });
+                    setSaved({ ok: true, text: `Saved as “${name}”.` });
+                  } catch (cause) {
+                    setSaved({
+                      ok: false,
+                      text: cause instanceof Error ? cause.message : String(cause),
+                    });
+                  }
+                }}
+                className="cursor-pointer rounded-md border border-border px-2.5 py-1 text-sm hover:bg-surface-2 disabled:opacity-50"
+              >
+                Save as experiment
+              </button>
+            </div>
+            {saved?.ok && (
+              <p className="text-sm text-success">
+                {saved.text}{" "}
+                <Link to="/experiments" className="underline underline-offset-2">
+                  Open experiments
+                </Link>
+              </p>
+            )}
+            {saved && !saved.ok && <ErrorAlert>{saved.text}</ErrorAlert>}
             <Insight result={current} />
             <Ranking
               result={current}

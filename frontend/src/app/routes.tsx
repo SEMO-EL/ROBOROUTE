@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 
 import { ArenaPage } from "@/features/arena/ArenaPage";
+import { ExperimentsPage } from "@/features/experiments/ExperimentsPage";
 import { MissionsPage } from "@/features/missions/MissionsPage";
 import { OverviewPage } from "@/features/overview/OverviewPage";
 import { RobotPage } from "@/features/robot/RobotPage";
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: "robot", element: <RobotPage /> },
       { path: "strategy", element: <StrategyPage /> },
       { path: "simulation", element: <SimulationPage /> },
+      { path: "experiments", element: <ExperimentsPage /> },
     ],
   },
 ]);
