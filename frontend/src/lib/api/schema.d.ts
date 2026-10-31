@@ -171,7 +171,7 @@ export interface paths {
      * Validate Scenario
      * @description Check a scenario and list every problem found: schema and reference errors first; for a
      *     well-formed scenario, constraint problems (cycles are errors, missions that can never be done
-     *     are warnings).
+     *     are warnings) and poses where the robot cannot stand (warnings).
      *
      *     Always answers 200 for a JSON object, so the editor can show the issues next to the fields.
      */
