@@ -5,6 +5,8 @@ import type { Scenario } from "@/lib/api/client";
 import { formatLength, formatSeconds } from "@/lib/format/units";
 import { footprintRadius } from "@/lib/robot/footprint";
 
+import { LatestResults } from "./LatestResults";
+
 const FORMAT_LABELS: Record<Scenario["format"]["kind"], string> = {
   single_run: "Single run — one continuous attempt (WRO-style)",
   multi_run: "Multiple runs — return to home between runs (FLL-style)",
@@ -50,6 +52,9 @@ export function ScenarioSummary({ scenario }: { scenario: Scenario }) {
           </div>
         ))}
       </dl>
+      <div className="border-t border-border px-4 py-3">
+        <LatestResults scenario={scenario} />
+      </div>
       <footer className="border-t border-border px-4 py-3">
         <Link
           to="/arena"
