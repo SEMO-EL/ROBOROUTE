@@ -45,6 +45,13 @@ rate-limits the base images, pass a mirror, e.g.
 
 ### As a public website
 
+- **GitHub Pages** (free, no server): <https://semo-el.github.io/ROBOROUTE/>. The Python engine
+  runs in the visitor's browser with [Pyodide](https://pyodide.org) (WebAssembly) in a Web
+  Worker, answering the same API through the same FastAPI app. CI builds it with
+  `pnpm build:pages` (`frontend/`), runs the end-to-end tests against it and deploys it after
+  every check on `main` passes. The first visit downloads about 20 MB (SciPy, 14 MB more, only
+  when calibrating); later visits come from the browser cache. One-time setup: repository
+  Settings → Pages → Source: **GitHub Actions**.
 - **Hugging Face Spaces** (free, no card needed): a GitHub Action publishes `main` to a Space
   after CI passes; see [docs/deploy-huggingface.md](docs/deploy-huggingface.md).
 - **Render** (free tier needs a card): `render.yaml` deploys the same container; see
@@ -75,6 +82,7 @@ Open <http://localhost:5173>. The Vite dev server proxies `/api` to the backend.
 | `pnpm test` (`frontend/`) | Vitest unit and component tests |
 | `pnpm lint && pnpm typecheck && pnpm format:check` (`frontend/`) | ESLint, TypeScript, Prettier |
 | `pnpm test:e2e` (`frontend/`) | Builds the app and runs Playwright against the backend serving it: the whole student workflow, plus an axe-core WCAG 2.2 AA scan of every page. Needs `uv` and Chromium (`pnpm exec playwright install chromium`) |
+| `pnpm test:e2e:pages` (`frontend/`) | The same tests against the GitHub Pages build, with the engine running in the browser (needs `uv` to build the backend wheel) |
 | `./scripts/check-api-types.sh` (repo root) | The TypeScript API types match the backend schema |
 | `uv run python ../experiments/<id>/run.py`, then `analyze.py` (`backend/`) | Re-runs a benchmark and regenerates its summary and figures (details at the top of each `run.py`; results in `docs/experiments/`) |
 

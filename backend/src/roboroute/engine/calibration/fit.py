@@ -17,7 +17,6 @@ from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import least_squares
 
 from roboroute.engine.models import MotionProfile
 from roboroute.engine.models.calibration import CalibrationResult, Measurement
@@ -99,6 +98,9 @@ def fit_profile(measurements: list[Measurement]) -> CalibrationResult:
     def residual(params: Array) -> Array:
         difference: Array = _predict(amounts, float(params[0]), float(params[1])) - seconds
         return difference
+
+    # Imported here: SciPy is a large download for the in-browser engine, fetched only when needed.
+    from scipy.optimize import least_squares
 
     fit = least_squares(
         residual,

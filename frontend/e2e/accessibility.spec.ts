@@ -28,7 +28,7 @@ test("every page passes the automated WCAG 2.2 AA checks", async ({ page }) => {
   test.setTimeout(180_000);
   const report: Record<string, unknown[]> = {};
 
-  await page.goto("/");
+  await page.goto("./");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   report.overview = await wcagViolations(page);
 
@@ -66,7 +66,7 @@ test("every page passes the automated WCAG 2.2 AA checks", async ({ page }) => {
 });
 
 test("the main controls work from the keyboard", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("./");
   // The first Tab reaches a skip link that jumps past the sidebar to the page content.
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();

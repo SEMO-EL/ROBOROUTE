@@ -108,6 +108,43 @@ jobs:
             frontend/test-results
           retention-days: 7
 
+  e2e-pages:
+    name: GitHub Pages build (engine in the browser), end-to-end and accessibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: uv sync --locked
+        working-directory: backend
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+      - run: pnpm test:e2e:pages
+        working-directory: frontend
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-pages
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 7
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: frontend/dist
+
   container:
     name: Container image builds and serves the app
     runs-on: ubuntu-latest
@@ -121,3 +158,21 @@ jobs:
       # Hosting platforms (Render) set the port through $PORT.
       - run: docker run -d --name roboroute-port -e PORT=10000 -p 10000:10000 roboroute:ci
       - run: curl --fail --silent --retry 20 --retry-delay 1 --retry-all-errors http://localhost:10000/api/v1/health
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend, frontend, contract, e2e, e2e-pages, container]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

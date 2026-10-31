@@ -5,7 +5,11 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-export default defineConfig({
+// `vite build --mode pages`: the GitHub Pages build, served from /ROBOROUTE/ with the engine
+// running in the browser (src/lib/api/engine.worker.ts) instead of on a server.
+export default defineConfig(({ mode }) => ({
+  base: mode === "pages" ? "/ROBOROUTE/" : "/",
+  define: mode === "pages" ? { "import.meta.env.VITE_ENGINE": JSON.stringify("pyodide") } : {},
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
@@ -15,6 +19,7 @@ export default defineConfig({
     // (the backend sends font-src 'self').
     assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
   },
+  worker: { format: "es" },
   server: {
     port: 5173,
     proxy: { "/api": "http://localhost:8000" },
@@ -26,4 +31,4 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     css: false,
   },
-});
+}));

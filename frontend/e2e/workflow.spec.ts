@@ -33,7 +33,7 @@ test("a student builds a field, plans, simulates, saves and explains a strategy"
   test.setTimeout(180_000);
 
   // 1. A new blank project for a single-run competition.
-  await page.goto("/");
+  await page.goto("./");
   await page.getByRole("button", { name: /One continuous run/ }).click();
   await expect(page.getByText("Valid scenario")).toBeVisible();
 

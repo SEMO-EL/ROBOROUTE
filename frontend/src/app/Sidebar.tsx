@@ -6,7 +6,7 @@ export function Sidebar() {
   return (
     <aside className="flex w-52 shrink-0 flex-col border-r border-border bg-surface">
       <div className="flex h-12 items-center gap-2 border-b border-border px-4">
-        <img src="/favicon.svg" alt="" className="size-5" />
+        <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-5" />
         <span className="font-semibold tracking-tight">RoboRoute</span>
       </div>
       <nav aria-label="Main" className="flex flex-col gap-0.5 p-2">

@@ -87,6 +87,15 @@ export async function unwrap<T>(
   return data as T;
 }
 
-const env = import.meta.env as { VITE_API_BASE?: string };
+const env = import.meta.env as { VITE_API_BASE?: string; VITE_ENGINE?: string };
 
-export const api = createApiClient(env.VITE_API_BASE ? { baseUrl: env.VITE_API_BASE } : {});
+/** The engine runs in this browser tab (the GitHub Pages build) instead of on a server. */
+export const IN_BROWSER = env.VITE_ENGINE === "pyodide";
+
+export const api = createApiClient(
+  IN_BROWSER
+    ? { fetch: async (request) => (await import("./engine-fetch")).engineFetch(request) }
+    : env.VITE_API_BASE
+      ? { baseUrl: env.VITE_API_BASE }
+      : {},
+);

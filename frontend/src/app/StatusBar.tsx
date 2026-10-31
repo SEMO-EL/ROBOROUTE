@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { api, unwrap, type Schemas } from "@/lib/api/client";
+import { api, IN_BROWSER, unwrap, type Schemas } from "@/lib/api/client";
 
 type ApiClient = typeof api;
 
@@ -34,12 +34,18 @@ export function StatusBar({ client = api }: { client?: ApiClient }) {
       role="status"
       className="flex h-7 shrink-0 items-center gap-3 border-t border-border bg-surface px-3 text-xs text-muted"
     >
-      {state.kind === "checking" && <span>Connecting to API…</span>}
+      {state.kind === "checking" && (
+        <span>
+          {IN_BROWSER
+            ? "Loading the engine into your browser (about 20 MB on the first visit)…"
+            : "Connecting to API…"}
+        </span>
+      )}
       {state.kind === "online" && (
         <>
           <span className="flex items-center gap-1.5">
             <span aria-hidden="true" className="size-2 rounded-full bg-success" />
-            API online
+            {IN_BROWSER ? "Engine ready (runs in your browser)" : "API online"}
           </span>
           <span className="font-mono">
             engine {state.version.version} · NumPy {state.version.numpy} · Python{" "}
@@ -50,7 +56,9 @@ export function StatusBar({ client = api }: { client?: ApiClient }) {
       {state.kind === "offline" && (
         <span className="flex items-center gap-1.5" title={state.reason}>
           <span aria-hidden="true" className="size-2 rounded-full bg-danger" />
-          API offline — start the backend (see README) to plan routes and run simulations.
+          {IN_BROWSER
+            ? "The engine could not load — reload the page to try again."
+            : "API offline — start the backend (see README) to plan routes and run simulations."}
         </span>
       )}
     </footer>
