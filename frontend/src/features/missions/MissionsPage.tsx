@@ -276,7 +276,10 @@ function MissionForm({ scenario, mission }: { scenario: Scenario; mission: Missi
       </div>
       <p className="text-xs text-muted">
         Position and heading are set on the{" "}
-        <Link to="/arena" className="text-accent underline-offset-2 hover:underline">
+        <Link
+          to="/arena"
+          className="text-accent underline underline-offset-2 hover:text-accent-strong"
+        >
           Arena page
         </Link>
         .

@@ -21,7 +21,7 @@
   --color-border-strong: #33456a;
   --color-text: #e2e8f0;
   --color-muted: #94a3b8;
-  --color-faint: #64748b;
+  --color-faint: #7c8ba1; /* ≥ 4.5:1 on bg, surface and surface-2 (WCAG AA body text) */
 
   --color-accent: #2dd4bf;
   --color-accent-strong: #14b8a6;

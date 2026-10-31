@@ -60,3 +60,12 @@ describe("save status", () => {
     useProjectStore.setState({ storageError: null });
   });
 });
+
+describe("Shell skip link", () => {
+  it("offers a skip link to the main content", () => {
+    renderShell();
+    const skip = screen.getByRole("link", { name: "Skip to content" });
+    expect(skip).toHaveAttribute("href", "#main");
+    expect(screen.getByRole("main")).toHaveAttribute("id", "main");
+  });
+});

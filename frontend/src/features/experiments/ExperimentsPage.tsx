@@ -216,7 +216,10 @@ export function ExperimentsPage({
       {sorted.length === 0 ? (
         <p className="text-muted">
           No experiments yet. Run a simulation and choose “Save as experiment” on the{" "}
-          <Link to="/simulation" className="text-accent underline-offset-2 hover:underline">
+          <Link
+            to="/simulation"
+            className="text-accent underline underline-offset-2 hover:text-accent-strong"
+          >
             Simulation page
           </Link>
           .

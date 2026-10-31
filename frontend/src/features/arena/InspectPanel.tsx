@@ -160,7 +160,10 @@ export function InspectPanel({
           <p className="text-xs text-muted">
             Id <span className="font-mono">{mission.id}</span>. Durations, success rate, points and
             constraints are edited on the{" "}
-            <Link to="/missions" className="text-accent underline-offset-2 hover:underline">
+            <Link
+              to="/missions"
+              className="text-accent underline underline-offset-2 hover:text-accent-strong"
+            >
               Missions page
             </Link>
             .

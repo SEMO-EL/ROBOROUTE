@@ -39,7 +39,10 @@ export function LatestResults({ scenario }: { scenario: Scenario }) {
     return (
       <p className="text-muted">
         No plan yet for this scenario.{" "}
-        <Link to="/strategy" className="text-accent underline-offset-2 hover:underline">
+        <Link
+          to="/strategy"
+          className="text-accent underline underline-offset-2 hover:text-accent-strong"
+        >
           Optimise it
         </Link>{" "}
         to see the expected score, then simulate it to see how it behaves under uncertainty.
