@@ -49,12 +49,29 @@ describe("trace replay", () => {
     expect(state.done).toBe(false);
   });
 
-  it("starts empty and ends at the goal", () => {
-    expect(replay(TRACE, 0).closed).toEqual([]);
+  it("starts with only the start cell in the frontier and ends at the goal", () => {
+    const first = replay(TRACE, 0);
+    expect(first.closed).toEqual([]);
+    expect(first.open).toEqual([[0, 0]]);
+    expect(first.current).toBeNull();
     const last = replay(TRACE, 99);
     expect(last.step).toBe(3);
     expect(last.done).toBe(true);
     expect(last.current?.cell).toEqual([2, 0]);
+  });
+
+  it("marks pushes that found a shorter route to a cell already in the frontier", () => {
+    const trace = [
+      expand(0, 0, 0, 2),
+      push(1, 1, [0, 0], 3, 1),
+      push(1, 0, [0, 0], 1, 1),
+      expand(1, 0, 1, 1),
+      push(1, 1, [1, 0], 2, 1),
+    ];
+    expect(replay(trace, 1).pushed.map((e) => e.improved)).toEqual([false, false]);
+    const second = replay(trace, 2);
+    expect(second.pushed.map((e) => [e.cell, e.improved])).toEqual([[[1, 1], true]]);
+    expect(second.pushed[0]?.previousG).toBe(3);
   });
 
   it("reproduces the search path by following parents from the goal", () => {

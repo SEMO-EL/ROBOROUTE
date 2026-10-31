@@ -16,15 +16,24 @@ export interface TraceEvent {
   f: number;
 }
 
+/** A push, annotated with whether it improved on an earlier route to the same cell. */
+export interface PushedEvent extends TraceEvent {
+  /** The cell was already in the frontier; this push found a shorter route to it. */
+  improved: boolean;
+  /** g of the earlier route when `improved`, otherwise null. */
+  previousG: number | null;
+}
+
 export interface ReplayState {
   /** Number of expansions shown (0 = before the search starts). */
   step: number;
   totalSteps: number;
   current: TraceEvent | null;
   /** Cells the current expansion pushed (neighbours that got a better route). */
-  pushed: TraceEvent[];
+  pushed: PushedEvent[];
   closed: number[][];
   open: number[][];
+  /** The last recorded expansion is shown (for a truncated trace this is not the search's end). */
   done: boolean;
 }
 
@@ -36,8 +45,9 @@ export function replay(events: readonly TraceEvent[], requestedStep: number): Re
   const closed: number[][] = [];
   const closedKeys = new Set<string>();
   const open = new Map<string, number[]>();
+  const bestG = new Map<string, number>();
   let current: TraceEvent | null = null;
-  let pushed: TraceEvent[] = [];
+  let pushed: PushedEvent[] = [];
   let expansions = 0;
 
   for (const event of events) {
@@ -52,14 +62,19 @@ export function replay(events: readonly TraceEvent[], requestedStep: number): Re
       closed.push([...event.cell]);
     } else {
       if (expansions === 0) continue;
-      pushed.push(event);
       const k = key(event.cell);
+      const previousG = open.has(k) ? (bestG.get(k) ?? null) : null;
+      pushed.push({ ...event, improved: previousG !== null, previousG });
+      bestG.set(k, event.g);
       if (!closedKeys.has(k)) {
         open.delete(k); // re-pushing moves the cell to the back of the insertion order
         open.set(k, [...event.cell]);
       }
     }
   }
+  // Before the first expansion the frontier holds only the start cell (it is never "pushed").
+  const start = events.find((e) => e.kind === "expand");
+  if (step === 0 && start) open.set(key(start.cell), [...start.cell]);
   return {
     step,
     totalSteps,
