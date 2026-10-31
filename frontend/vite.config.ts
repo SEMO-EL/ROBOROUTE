@@ -10,6 +10,11 @@ export default defineConfig({
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },
+  build: {
+    // Keep fonts as files: inlined data: URIs would need a looser Content-Security-Policy
+    // (the backend sends font-src 'self').
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
+  },
   server: {
     port: 5173,
     proxy: { "/api": "http://localhost:8000" },

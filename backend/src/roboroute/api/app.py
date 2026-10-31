@@ -15,7 +15,9 @@ from roboroute.api.routes import (
     scenarios,
     simulate,
 )
+from roboroute.api.security import SecurityHeadersMiddleware
 from roboroute.api.settings import Settings
+from roboroute.api.static import SinglePageApp
 from roboroute.engine.scenarios import list_example_scenarios
 
 API_PREFIX = "/api/v1"
@@ -41,9 +43,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["content-type"],
     )
     app.add_middleware(BodySizeLimitMiddleware, max_bytes=settings.max_body_bytes)
+    app.add_middleware(SecurityHeadersMiddleware, csp_exempt=(f"{API_PREFIX}/docs",))
 
     for module in (meta, examples, scenarios, routing, calibration, optimize, simulate):
         app.include_router(module.router, prefix=API_PREFIX)
+    if settings.static_dir is not None:
+        # Mounted last so that API routes take precedence.
+        app.mount("/", SinglePageApp(directory=settings.static_dir), name="app")
     return app
 
 
