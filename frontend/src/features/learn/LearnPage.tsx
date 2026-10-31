@@ -99,11 +99,20 @@ export function LearnPage({ client = api }: { client?: ApiClient }) {
           </button>
         ))}
       </div>
-      <div role="tabpanel" id={`panel-${topic}`} aria-labelledby={`tab-${topic}`}>
-        {topic === "pathfinding" && <PathfindingLesson scenario={scenario} client={client} />}
-        {topic === "optimisation" && <OptimisationLesson scenario={scenario} client={client} />}
-        {topic === "simulation" && <SimulationLesson scenario={scenario} client={client} />}
-      </div>
+      {/* All panels stay mounted (hidden when inactive) so a lesson keeps its state. */}
+      {TOPICS.map((t) => (
+        <div
+          key={t.id}
+          role="tabpanel"
+          id={`panel-${t.id}`}
+          aria-labelledby={`tab-${t.id}`}
+          hidden={topic !== t.id}
+        >
+          {t.id === "pathfinding" && <PathfindingLesson scenario={scenario} client={client} />}
+          {t.id === "optimisation" && <OptimisationLesson scenario={scenario} client={client} />}
+          {t.id === "simulation" && <SimulationLesson scenario={scenario} client={client} />}
+        </div>
+      ))}
     </div>
   );
 }

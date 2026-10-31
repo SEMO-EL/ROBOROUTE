@@ -194,3 +194,32 @@ describe("LearnPage", () => {
     expect(useSimulationStore.getState().result).toBeNull();
   });
 });
+
+describe("LearnPage tabs", () => {
+  it("keeps every tab's panel so switching tabs does not lose a lesson's state", async () => {
+    const user = userEvent.setup();
+    useProjectStore.setState({ scenario: SCENARIO_A, status: "ready" });
+    renderPage("pathfinding");
+    await user.click(screen.getByRole("button", { name: "Plan route" }));
+    expect(await screen.findByText(/step 0 of 2/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("tab", { name: "Optimisation" }));
+    await user.click(screen.getByRole("tab", { name: "Pathfinding" }));
+    expect(screen.getByText(/step 0 of 2/i)).toBeInTheDocument();
+    for (const tab of screen.getAllByRole("tab")) {
+      expect(document.getElementById(tab.getAttribute("aria-controls") ?? "")).not.toBeNull();
+    }
+  });
+
+  it("moves between tabs with the arrow keys", async () => {
+    const user = userEvent.setup();
+    useProjectStore.setState({ scenario: SCENARIO_A, status: "ready" });
+    renderPage("pathfinding");
+    screen.getByRole("tab", { name: "Pathfinding" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Optimisation" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByRole("tab", { name: "Optimisation" })).toHaveFocus();
+  });
+});
