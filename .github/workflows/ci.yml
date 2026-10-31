@@ -74,3 +74,47 @@ jobs:
       - run: pnpm install --frozen-lockfile
         working-directory: frontend
       - run: ./scripts/check-api-types.sh
+
+  e2e:
+    name: End-to-end and accessibility (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: uv sync --locked
+        working-directory: backend
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+      - run: pnpm test:e2e
+        working-directory: frontend
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 7
+
+  container:
+    name: Container image builds and serves the app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t roboroute:ci .
+      - run: docker run -d --name roboroute -p 8000:8000 roboroute:ci
+      - run: curl --fail --silent --retry 20 --retry-delay 1 --retry-all-errors http://localhost:8000/api/v1/health
+      - run: curl --fail --silent http://localhost:8000/learn | grep -q '<div id="root">'
+      - run: test "$(docker exec roboroute id -u)" != "0"
