@@ -10,6 +10,7 @@ import { formatCm, heuristicWorking, parseAlgorithm, type SearchConfig } from ".
 const TICK_MS = 120;
 const SPEEDS = [1, 5, 25, 100] as const;
 
+const centimetres = (metres: number) => (metres * 100).toFixed(2);
 const cellLabel = (cell: readonly number[]) => `(${String(cell[0])}, ${String(cell[1])})`;
 const sameCells = (a: readonly (readonly number[])[], b: readonly (readonly number[])[]) =>
   a.length === b.length && a.every((cell, i) => cell[0] === b[i]?.[0] && cell[1] === b[i]?.[1]);
@@ -333,7 +334,7 @@ function PushedTable({ pushed }: { pushed: PushedEvent[] }) {
     );
   }
   return (
-    <table className="w-full text-left text-xs">
+    <table className="w-full text-left text-xs [&_td]:py-1 [&_td]:pr-3 [&_th]:pr-3 [&_td:last-child]:pr-0 [&_th:last-child]:pr-0">
       <caption className="mb-1 text-left text-muted">
         Neighbours updated by this expansion (they enter or move within the frontier)
       </caption>
@@ -342,14 +343,14 @@ function PushedTable({ pushed }: { pushed: PushedEvent[] }) {
           <th scope="col" className="py-1 font-normal">
             Cell
           </th>
-          <th scope="col" className="font-normal">
-            g
+          <th scope="col" className="text-right font-normal">
+            g (cm)
           </th>
-          <th scope="col" className="font-normal">
-            h
+          <th scope="col" className="text-right font-normal">
+            h (cm)
           </th>
-          <th scope="col" className="font-normal">
-            f
+          <th scope="col" className="text-right font-normal">
+            f (cm)
           </th>
           <th scope="col" className="font-normal">
             Note
@@ -359,10 +360,10 @@ function PushedTable({ pushed }: { pushed: PushedEvent[] }) {
       <tbody className="font-mono">
         {pushed.map((event, index) => (
           <tr key={index} className="border-t border-border">
-            <td className="py-1">{cellLabel(event.cell)}</td>
-            <td>{formatCm(event.g)}</td>
-            <td>{formatCm(event.h)}</td>
-            <td>{formatCm(event.f)}</td>
+            <td className="whitespace-nowrap">{cellLabel(event.cell)}</td>
+            <td className="text-right">{centimetres(event.g)}</td>
+            <td className="text-right">{centimetres(event.h)}</td>
+            <td className="text-right">{centimetres(event.f)}</td>
             <td className="font-sans text-muted">
               {event.improved && event.previousG !== null
                 ? `shorter route (was ${formatCm(event.previousG)})`

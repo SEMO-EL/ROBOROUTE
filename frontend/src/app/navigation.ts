@@ -3,6 +3,7 @@ import {
   FlaskConical,
   ChartNoAxesColumn,
   Flag,
+  GraduationCap,
   LayoutDashboard,
   Map,
   Route,
@@ -42,5 +43,11 @@ export const NAV_ITEMS: readonly NavItem[] = [
     label: "Experiments",
     icon: FlaskConical,
     description: "Saved runs: reproduce, compare, export",
+  },
+  {
+    to: "/learn",
+    label: "Learn",
+    icon: GraduationCap,
+    description: "How the answers are computed, step by step",
   },
 ];

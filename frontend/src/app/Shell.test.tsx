@@ -35,6 +35,7 @@ describe("Shell", () => {
       "Strategy",
       "Simulation",
       "Experiments",
+      "Learn",
     ]);
   });
 

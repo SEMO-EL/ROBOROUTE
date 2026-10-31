@@ -37,17 +37,26 @@ export function SearchGrid({ grid, state, start, goal, path }: SearchGridProps) 
     })
     .join("");
   const centre = ([i = 0, j = 0]: Cell): [number, number] => [(i + 0.5) * h, top(j) + h / 2];
+  // Markers stay legible on fine grids: at least 1/60 of the field's larger side.
+  const markerRadius = Math.max(h * 0.42, Math.max(width, height) / 60);
   const marker = (cell: Cell, label: string, className: string) => {
     const [x, y] = centre(cell);
     return (
       <g>
-        <circle cx={x} cy={y} r={h * 0.42} className={className} />
+        <circle
+          cx={x}
+          cy={y}
+          r={markerRadius}
+          className={`${className} stroke-bg`}
+          strokeWidth={1.5}
+          vectorEffect="non-scaling-stroke"
+        />
         <text
           x={x}
           y={y}
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={h * 0.55}
+          fontSize={markerRadius * 1.3}
           className="fill-bg font-semibold"
         >
           {label}
