@@ -1,9 +1,7 @@
 import { useId, useState } from "react";
 
 import { NumberField } from "@/components/NumberField";
-import type { Model } from "@/lib/api/client";
-
-type Distribution = Model<"Fixed"> | Model<"Triangular"> | Model<"LogNormal"> | Model<"Empirical">;
+import { distributionMean as mean, type Distribution } from "@/lib/scenario/distributions";
 
 const KINDS: { value: Distribution["kind"]; label: string }[] = [
   { value: "fixed", label: "Always the same" },
@@ -11,20 +9,6 @@ const KINDS: { value: Distribution["kind"]; label: string }[] = [
   { value: "lognormal", label: "Typical time and spread" },
   { value: "empirical", label: "My measured times" },
 ];
-
-/** Display-only; mirrors `mean()` of the backend distribution models. */
-function mean(d: Distribution): number {
-  switch (d.kind) {
-    case "fixed":
-      return d.value;
-    case "triangular":
-      return (d.low + d.mode + d.high) / 3;
-    case "lognormal":
-      return d.median * Math.exp(Math.log(d.gsd) ** 2 / 2);
-    case "empirical":
-      return d.samples.reduce((a, b) => a + b, 0) / Math.max(1, d.samples.length);
-  }
-}
 
 function convert(d: Distribution, kind: Distribution["kind"]): Distribution {
   const m = Number(mean(d).toFixed(1));
