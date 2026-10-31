@@ -1,0 +1,19 @@
+# Only what the image needs: frontend sources, backend sources and lockfiles, scenarios.
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.hypothesis
+**/*.tsbuildinfo
+.git
+docs
+experiments
+backend/tests
+frontend/e2e
+frontend/test-results
+frontend/playwright-report
+.env
+.env.*
