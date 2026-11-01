@@ -20,30 +20,21 @@ BASE_POLICY = [
 ]
 
 
-def content_security_policy(frame_ancestors: tuple[str, ...] = ()) -> str:
-    """The policy; ``frame_ancestors`` lists sites allowed to show the app in a frame (none by
-    default; e.g. Hugging Face shows a Space inside its own page)."""
-    frames = " ".join(["'self'", *frame_ancestors]) if frame_ancestors else "'none'"
-    return "; ".join([*BASE_POLICY, f"frame-ancestors {frames}"])
+# frame-ancestors is kept apart: the GitHub Pages build puts BASE_POLICY in a <meta> tag, which
+# cannot carry it.
+CONTENT_SECURITY_POLICY = "; ".join([*BASE_POLICY, "frame-ancestors 'none'"])
 
 
 class SecurityHeadersMiddleware:
-    def __init__(
-        self,
-        app: ASGIApp,
-        csp_exempt: tuple[str, ...] = (),
-        frame_ancestors: tuple[str, ...] = (),
-    ) -> None:
+    def __init__(self, app: ASGIApp, csp_exempt: tuple[str, ...] = ()) -> None:
         self.app = app
         self.csp_exempt = csp_exempt
-        self.csp = content_security_policy(frame_ancestors).encode()
+        self.csp = CONTENT_SECURITY_POLICY.encode()
         self.headers = [
             (b"x-content-type-options", b"nosniff"),
+            (b"x-frame-options", b"DENY"),
             (b"referrer-policy", b"no-referrer"),
         ]
-        if not frame_ancestors:
-            # X-Frame-Options cannot name other sites, so it is only sent when framing is denied.
-            self.headers.append((b"x-frame-options", b"DENY"))
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":

@@ -21,6 +21,7 @@ class SinglePageApp(StaticFiles):
         super().__init__(html=True, **kwargs)
 
     async def get_response(self, path: str, scope: Scope) -> Response:
+        path = path.replace("\\", "/")  # StaticFiles gives OS separators; Windows uses "\\"
         if path == "api" or path.startswith("api/"):
             raise HTTPException(status_code=404, detail="Not Found")
         try:

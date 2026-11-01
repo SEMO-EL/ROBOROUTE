@@ -135,5 +135,6 @@ the experiment as a file or every simulated match as a spreadsheet (CSV).
 | Missions per scenario | 32 (exact optimisation up to 16 candidates; above that only the greedy plan) |
 | Speed-sensitivity analysis | up to 12 candidate missions |
 | Planning grid | 400 000 cells (choose a coarser grid resolution for large fields) |
+| Travel times between all missions | grid cells × (missions + 1) up to 3 000 000 — e.g. a 400 000-cell grid allows 6 missions, a 100 000-cell grid 29 |
 | Simulation | 50 000 matches per plan, 3 plans and 100 000 matches per run |
 | Imported files | 1 MB |

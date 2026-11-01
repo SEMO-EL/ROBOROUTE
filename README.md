@@ -45,19 +45,13 @@ rate-limits the base images, pass a mirror, e.g.
 
 ### As a public website
 
-- **GitHub Pages** (free, no server): <https://semo-el.github.io/ROBOROUTE/>. The Python engine
-  runs in the visitor's browser with [Pyodide](https://pyodide.org) (WebAssembly) in a Web
-  Worker, answering the same API through the same FastAPI app. CI builds it with
-  `pnpm build:pages` (`frontend/`), runs the end-to-end tests against it and deploys it after
-  every check on `main` passes. The first visit downloads about 20 MB (SciPy, 14 MB more, only
-  when calibrating); later visits come from the browser cache. One-time setup: repository
-  Settings → Pages → Source: **GitHub Actions**.
-- **Hugging Face Spaces** (free, no card needed): a GitHub Action publishes `main` to a Space
-  after CI passes; see [docs/deploy-huggingface.md](docs/deploy-huggingface.md).
-- **Render** (free tier needs a card): `render.yaml` deploys the same container; see
-  [docs/deploy-render.md](docs/deploy-render.md).
-
-Both add limits suited to a public site (requests per visitor, calculations at once).
+GitHub Pages (free, no server): <https://semo-el.github.io/ROBOROUTE/>. The Python engine runs
+in the visitor's browser with [Pyodide](https://pyodide.org) (WebAssembly) in a Web Worker,
+answering the same API through the same FastAPI app. CI builds it with `pnpm build:pages`
+(`frontend/`), runs the end-to-end tests against it and deploys it after every check on `main`
+passes. The first visit downloads about 20 MB (SciPy, 14 MB more, only when calibrating); later
+visits come from the browser cache. One-time setup: repository Settings → Pages → Source:
+**GitHub Actions**.
 
 ### For development
 
@@ -100,11 +94,6 @@ and commit the result. After changing an example scenario, run
 | `ROBOROUTE_EXAMPLES_DIR` | `<repo>/scenarios` | Directory of example scenarios |
 | `ROBOROUTE_CORS_ORIGINS` | `http://localhost:5173` | Comma-separated browser origins allowed to call the API from elsewhere (empty when served together) |
 | `ROBOROUTE_MAX_BODY_BYTES` | `1000000` | Maximum request body size |
-| `ROBOROUTE_RATE_LIMIT_PER_MINUTE` | `0` (off) | Heavy calculations (routes, optimise, simulate) allowed per client address per minute |
-| `ROBOROUTE_MAX_CONCURRENT_JOBS` | `0` (off) | Heavy calculations running at once; others wait up to 30 s, then get "busy" |
-| `ROBOROUTE_FRAME_ANCESTORS` | unset (no framing) | Space-separated sites allowed to show the app in a frame (e.g. `https://huggingface.co`) |
-| `PORT` (container) | `8000` | Port the container listens on (set by hosting platforms) |
-| `FORWARDED_ALLOW_IPS` (container) | `127.0.0.1` | Proxies trusted for the client address; `*` behind a platform proxy |
 | `VITE_API_BASE` (frontend build) | page origin | API origin if the API is hosted separately |
 
 ## Security

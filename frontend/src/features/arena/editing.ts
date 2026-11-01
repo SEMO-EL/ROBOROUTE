@@ -110,10 +110,6 @@ export function addMission(scenario: Scenario, at: Vec2): { scenario: Scenario; 
   };
 }
 
-function refersTo(value: unknown, id: string): boolean {
-  return JSON.stringify(value).includes(`"${id}"`);
-}
-
 export function deleteSelection(scenario: Scenario, selection: Selection): Scenario {
   if (!selection || selection.kind === "start") return scenario;
   const { id } = selection;
@@ -139,7 +135,7 @@ export function deleteSelection(scenario: Scenario, selection: Selection): Scena
       ),
     },
     travel_overrides: scenario.travel_overrides.filter(
-      (o) => !refersTo([o.from_node, o.to_node], id),
+      (o) => o.from_node !== id && o.to_node !== id,
     ),
   };
 }

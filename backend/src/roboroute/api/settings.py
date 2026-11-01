@@ -15,11 +15,6 @@ class Settings:
     max_body_bytes: int = 1_000_000
     # Built frontend (frontend/dist) to serve alongside the API; None serves the API only.
     static_dir: Path | None = None
-    # Public deployments: heavy requests per client per minute, and how many run at once (0 = off).
-    rate_limit_per_minute: int = 0
-    max_concurrent_jobs: int = 0
-    # Sites allowed to show the app in a frame (e.g. Hugging Face Spaces); none by default.
-    frame_ancestors: tuple[str, ...] = ()
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -29,9 +24,4 @@ class Settings:
             cors_origins=tuple(o.strip() for o in origins.split(",") if o.strip()),
             max_body_bytes=int(os.environ.get("ROBOROUTE_MAX_BODY_BYTES", "1000000")),
             static_dir=Path(static) if (static := os.environ.get("ROBOROUTE_STATIC_DIR")) else None,
-            rate_limit_per_minute=int(os.environ.get("ROBOROUTE_RATE_LIMIT_PER_MINUTE", "0")),
-            max_concurrent_jobs=int(os.environ.get("ROBOROUTE_MAX_CONCURRENT_JOBS", "0")),
-            frame_ancestors=tuple(
-                a for a in os.environ.get("ROBOROUTE_FRAME_ANCESTORS", "").split() if a
-            ),
         )

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { ErrorAlert } from "@/components/Alert";
@@ -25,6 +25,8 @@ export function OverviewPage({ client = api }: { client?: ApiClient }) {
   const loadExample = useProjectStore((s) => s.loadExample);
   const replace = useProjectStore((s) => s.replace);
   const navigate = useNavigate();
+  // The summary of a chosen example appears below the list, often off screen: scroll to it.
+  const scrollToSummary = useRef(false);
 
   function startBlank(kind: "single_run" | "multi_run") {
     replace(blankScenario(kind));
@@ -72,7 +74,10 @@ export function OverviewPage({ client = api }: { client?: ApiClient }) {
               <li key={example.id}>
                 <button
                   type="button"
-                  onClick={() => void loadExample(example.id, client)}
+                  onClick={() => {
+                    scrollToSummary.current = true;
+                    void loadExample(example.id, client);
+                  }}
                   aria-pressed={scenario?.id === example.id}
                   className="flex w-full cursor-pointer flex-col items-start gap-0.5 px-4 py-3 text-left transition-colors hover:bg-surface-2 aria-pressed:bg-surface-2"
                 >
@@ -118,7 +123,18 @@ export function OverviewPage({ client = api }: { client?: ApiClient }) {
 
       {status === "loading" && <p className="text-muted">Loading scenario…</p>}
       {status === "error" && loadError && <ErrorAlert>{loadError}</ErrorAlert>}
-      {scenario && <ScenarioSummary scenario={scenario} />}
+      {scenario && (
+        <div
+          ref={(node) => {
+            if (node && scrollToSummary.current) {
+              scrollToSummary.current = false;
+              node.scrollIntoView({ block: "start" });
+            }
+          }}
+        >
+          <ScenarioSummary scenario={scenario} />
+        </div>
+      )}
     </div>
   );
 }

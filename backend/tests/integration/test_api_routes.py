@@ -83,3 +83,10 @@ def test_calibration_fit(client: TestClient) -> None:
     result = client.post("/api/v1/calibration/fit", json=body).json()
     assert abs(result["max_speed"] - 1 / 3) < 1e-9
     assert result["model"] == "trapezoidal"
+
+
+def test_calibration_refuses_an_impossible_speed(client: TestClient) -> None:
+    body = {"kind": "linear", "measurements": [{"amount": 10, "seconds": 0.1}]}
+    response = client.post("/api/v1/calibration/fit", json=body)
+    assert response.status_code == 422
+    assert response.json()["code"] == "implausible_calibration"

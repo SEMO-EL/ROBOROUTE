@@ -71,6 +71,21 @@ describe("ExperimentsPage", () => {
     expect(names).toEqual(["Second run", "Optimal vs greedy"]);
   });
 
+  it("skips a damaged experiment instead of failing to render", () => {
+    const storage = new MemoryStorage();
+    const damaged = { ...EXPERIMENT, id: "bad", result: { ...SIMULATE_RESULT, plans: [{}] } };
+    storage.setItem("roboroute:experiment:bad", JSON.stringify(damaged));
+    const repo = new LocalRepository("experiment", isStoredExperiment, storage);
+    repo.save(EXPERIMENT);
+    render(
+      <MemoryRouter>
+        <ExperimentsPage repository={repo} client={client(SIMULATE_RESULT)} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText(/Skipped an unreadable saved item \(bad\)/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Optimal vs greedy" })).toBeInTheDocument();
+  });
+
   it("shows the saved results of the selected experiment", async () => {
     setup();
     await userEvent.click(screen.getByRole("button", { name: "View Optimal vs greedy" }));

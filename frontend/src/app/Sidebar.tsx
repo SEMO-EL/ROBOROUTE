@@ -4,10 +4,10 @@ import { NAV_ITEMS } from "./navigation";
 
 export function Sidebar() {
   return (
-    <aside className="flex w-52 shrink-0 flex-col border-r border-border bg-surface">
-      <div className="flex h-12 items-center gap-2 border-b border-border px-4">
+    <aside className="flex w-14 shrink-0 flex-col border-r border-border bg-surface md:w-52">
+      <div className="flex h-12 items-center gap-2 border-b border-border px-4.5 md:px-4">
         <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-5" />
-        <span className="font-semibold tracking-tight">RoboRoute</span>
+        <span className="hidden font-semibold tracking-tight md:inline">RoboRoute</span>
       </div>
       <nav aria-label="Main" className="flex flex-col gap-0.5 p-2">
         {NAV_ITEMS.map(({ to, label, icon: Icon, description }) => (
@@ -25,8 +25,9 @@ export function Sidebar() {
               ].join(" ")
             }
           >
-            <Icon aria-hidden="true" className="size-4" />
-            {label}
+            <Icon aria-hidden="true" className="size-4 shrink-0" />
+            {/* Phones show icons only; the name stays available to screen readers. */}
+            <span className="sr-only md:not-sr-only">{label}</span>
           </NavLink>
         ))}
       </nav>

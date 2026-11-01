@@ -53,6 +53,26 @@ export function isStoredProject(value: unknown): value is StoredProject {
   );
 }
 
+const isNumber = (value: unknown): value is number => typeof value === "number";
+
+/** The fields of a simulated plan that the experiment pages read. */
+function isSimulatedPlan(plan: unknown): boolean {
+  return (
+    isObject(plan) &&
+    typeof plan.label === "string" &&
+    isNumber(plan.analytic_expected_score) &&
+    isObject(plan.score) &&
+    isNumber(plan.score.mean) &&
+    isObject(plan.score.mean_ci) &&
+    isNumber(plan.score.mean_ci.low) &&
+    isNumber(plan.score.mean_ci.high) &&
+    isObject(plan.probability_cut_off) &&
+    isNumber(plan.probability_cut_off.estimate) &&
+    Array.isArray(plan.score_ecdf)
+  );
+}
+
+/** Checks everything the experiment pages read, so a damaged or hand-edited file is refused. */
 export function isStoredExperiment(value: unknown): value is StoredExperiment {
   return (
     isObject(value) &&
@@ -60,8 +80,16 @@ export function isStoredExperiment(value: unknown): value is StoredExperiment {
     typeof value.name === "string" &&
     typeof value.createdAt === "string" &&
     isObject(value.request) &&
+    isObject(value.request.scenario) &&
+    typeof value.request.scenario.name === "string" &&
+    Array.isArray(value.request.plans) &&
+    value.request.plans.every((plan) => isObject(plan) && typeof plan.label === "string") &&
+    isObject(value.request.config) &&
     isObject(value.result) &&
-    Array.isArray(value.result.plans)
+    isObject(value.result.metadata) &&
+    Array.isArray(value.result.differences) &&
+    Array.isArray(value.result.plans) &&
+    value.result.plans.every(isSimulatedPlan)
   );
 }
 

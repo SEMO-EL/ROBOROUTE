@@ -82,3 +82,13 @@ def test_noisy_data_reports_residuals() -> None:
     result = fit_profile(noisy)
     assert 0.9 < (result.r_squared or 0) < 1.0
     assert len(result.residuals) == 4
+
+
+def test_unmeasurably_small_overhead_gives_a_constant_speed_model() -> None:
+    # Line fit: v ≈ 0.5 m/s, a ≈ 4000 m/s² — beyond what a robot profile accepts.
+    result = fit_profile(
+        [Measurement(amount=0.2, seconds=0.4), Measurement(amount=1.0, seconds=1.9995)]
+    )
+    assert result.model == "constant_speed"
+    assert result.method == "proportional_fit"
+    MotionProfile(max_speed=result.max_speed, acceleration=result.acceleration)

@@ -9,7 +9,9 @@ any measurement falls in that regime, the line fit is used as the starting point
 least-squares fit of the exact piecewise model (SciPy ``least_squares``).
 
 Degenerate inputs never produce NaN: a single distance only identifies the average speed
-(constant-speed model), and inconsistent data falls back to it with a warning.
+(constant-speed model), and inconsistent data falls back to it with a warning. An acceleration
+above what a robot profile allows means the start/stop overhead is too small to measure, so the
+constant-speed fit is used instead.
 """
 
 import math
@@ -20,6 +22,7 @@ from numpy.typing import NDArray
 
 from roboroute.engine.models import MotionProfile
 from roboroute.engine.models.calibration import CalibrationResult, Measurement
+from roboroute.engine.models.robot import MAX_ACCELERATION
 from roboroute.engine.motion.profiles import profile_time
 
 Array = NDArray[np.float64]
@@ -44,8 +47,6 @@ def _result(
     residuals = seconds - _predict(amounts, v, a)
     total = float(np.sum((seconds - seconds.mean()) ** 2))
     r_squared = 1.0 - float(np.sum(residuals**2)) / total if total > 0 else None
-    if v > 50 or (a is not None and a > 500):
-        warnings.append("The fitted values are implausibly large; please check the measurements.")
     return CalibrationResult(
         max_speed=v,
         acceleration=a,
@@ -82,18 +83,26 @@ def fit_profile(measurements: list[Measurement]) -> CalibrationResult:
         )
         return average_speed()
 
-    if intercept <= 1e-9:
-        # No measurable start/stop overhead: fit t = d / v through the origin.
+    def proportional() -> CalibrationResult:
+        """No measurable start/stop overhead: fit t = d / v through the origin."""
         warnings.append(
             "No acceleration overhead is visible in the data; a constant-speed model is used."
         )
         inverse_v = float(np.dot(amounts, seconds) / np.dot(amounts, amounts))
         return _result(amounts, seconds, 1.0 / inverse_v, None, "proportional_fit", warnings)
 
+    def trapezoidal(v: float, a: float, method: Method) -> CalibrationResult:
+        if a > MAX_ACCELERATION:
+            return proportional()
+        return _result(amounts, seconds, v, a, method, warnings)
+
+    if intercept <= 1e-9:
+        return proportional()
+
     v = 1.0 / float(slope)
     a = v / float(intercept)
     if bool(np.all(amounts >= v * v / a - 1e-9)):
-        return _result(amounts, seconds, v, a, "linear_least_squares", warnings)
+        return trapezoidal(v, a, "linear_least_squares")
 
     def residual(params: Array) -> Array:
         difference: Array = _predict(amounts, float(params[0]), float(params[1])) - seconds
@@ -112,7 +121,5 @@ def fit_profile(measurements: list[Measurement]) -> CalibrationResult:
     )
     if not fit.success:
         warnings.append(f"The exact model fit did not converge ({fit.message}); line fit used.")
-        return _result(amounts, seconds, v, a, "linear_least_squares", warnings)
-    return _result(
-        amounts, seconds, float(fit.x[0]), float(fit.x[1]), "nonlinear_least_squares", warnings
-    )
+        return trapezoidal(v, a, "linear_least_squares")
+    return trapezoidal(float(fit.x[0]), float(fit.x[1]), "nonlinear_least_squares")

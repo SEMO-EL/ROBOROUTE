@@ -65,16 +65,13 @@ def explain(instance: PlanningInstance, result: DPResult) -> Explanation:
             verdicts.append(MissionVerdict(mission, True, reason, without, delta))
             continue
         if not (has & feasible).any():
-            fastest = float(result.completion_time[has].min()) if has.any() else math.inf
-            if math.isfinite(fastest):
-                reason = (
-                    f"Left out: every plan that includes it needs at least {fastest:.1f} s, more "
-                    f"than the {instance.budget:g} s budget."
-                )
-            else:
-                reason = (
-                    "Left out: no order of missions that includes it satisfies the constraints."
-                )
+            # The DP keeps only states within the budget, so time and rules (requirements, order,
+            # attachments) cannot be told apart here; missions that are impossible by rules alone
+            # were already removed with their own reason.
+            reason = (
+                "Left out: no plan that includes it, together with the missions it needs, fits "
+                f"in the {instance.budget:g} s budget and follows the mission rules."
+            )
             verdicts.append(MissionVerdict(mission, False, reason, None, None))
             continue
         with_it = float(scores[has].max())

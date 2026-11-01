@@ -43,8 +43,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
     ROBOROUTE_CORS_ORIGINS=""
 USER roboroute
 EXPOSE 8000
-# Hosting platforms such as Render choose the port through $PORT; 8000 otherwise. Behind a
-# platform's proxy, set FORWARDED_ALLOW_IPS so client addresses come from X-Forwarded-For.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
-    CMD ["sh", "-c", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:${PORT:-8000}/api/v1/health', timeout=2)\""]
-CMD ["sh", "-c", "exec uvicorn roboroute.api.app:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers"]
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=2)"]
+CMD ["uvicorn", "roboroute.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]

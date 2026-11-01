@@ -9,6 +9,10 @@ from roboroute.engine.models.base import Label, Length, NonNegativeLength, Stric
 
 ParameterProvenance = Literal["calibrated", "entered", "reference"]
 
+# Bounds for both translation (m/s, m/s²) and rotation (rad/s, rad/s²).
+MAX_SPEED = 50.0
+MAX_ACCELERATION = 500.0
+
 
 class MotionProfile(StrictModel):
     """Speed limits for one degree of freedom.
@@ -21,8 +25,8 @@ class MotionProfile(StrictModel):
     measurements), ``entered`` (typed by the user) or ``reference`` (manufacturer ceiling).
     """
 
-    max_speed: float = Field(gt=0.0, le=50.0)
-    acceleration: float | None = Field(default=None, gt=0.0, le=500.0)
+    max_speed: float = Field(gt=0.0, le=MAX_SPEED)
+    acceleration: float | None = Field(default=None, gt=0.0, le=MAX_ACCELERATION)
     provenance: ParameterProvenance = "entered"
 
 

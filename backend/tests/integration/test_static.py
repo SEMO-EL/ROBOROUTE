@@ -84,17 +84,3 @@ def test_without_a_static_directory_only_the_api_is_served(client: TestClient) -
     response = client.get("/")
     assert response.status_code == 404
     assert response.json()["code"] == "not_found"
-
-
-def test_embedding_can_be_allowed_for_named_sites(site: Path) -> None:
-    settings = Settings(
-        examples_dir=SCENARIOS_DIR,
-        cors_origins=(),
-        max_body_bytes=1_000_000,
-        static_dir=site,
-        frame_ancestors=("https://huggingface.co",),
-    )
-    headers = TestClient(create_app(settings)).get("/").headers
-    assert "frame-ancestors 'self' https://huggingface.co" in headers["content-security-policy"]
-    # X-Frame-Options cannot name another site; the CSP directive takes over.
-    assert "x-frame-options" not in headers

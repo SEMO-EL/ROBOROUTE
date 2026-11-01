@@ -70,3 +70,19 @@ def test_dp_summary(client: TestClient) -> None:
     best = summary["best_sets"][0]
     assert best["expected_score"] == body["optimal"]["expected_score"]
     assert sorted(best["missions"]) == sorted(m for run in body["optimal"]["runs"] for m in run)
+
+
+def test_left_out_for_lack_of_time_is_not_blamed_on_the_rules(client: TestClient) -> None:
+    # beacon and bridge take 60 s each in a 120 s match, and bridge requires beacon.
+    scenario = load("a-simple-arena")
+    for mission in scenario["missions"][:2]:
+        mission["execution_time"] = {"kind": "fixed", "value": 60}
+    scenario["constraints"] = [{"kind": "requires", "before": "beacon", "after": "bridge"}]
+    verdicts = {v["mission"]: v for v in optimize(client, scenario)["explanation"]["verdicts"]}
+    assert not verdicts["bridge"]["selected"]
+    assert "120 s budget" in verdicts["bridge"]["reason"]
+
+
+def test_speed_factors_must_be_positive(client: TestClient) -> None:
+    body = {"scenario": load("a-simple-arena"), "settings": {"sensitivity_factors": [0]}}
+    assert client.post("/api/v1/optimize", json=body).status_code == 422
